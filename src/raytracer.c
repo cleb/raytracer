@@ -13,13 +13,21 @@ Point intersects(double x, double y, double alpha, double beta, Wall* wall){
     double b = wall->p1.y - a*wall->p1.x;
     double tg_alpha = tan(alpha);
     double pa = tg_alpha;
-    double pb = x * tg_alpha - y;
+    double pb = y - x * tg_alpha;
     double intersection_x = (b - pb) / (pa - a);
     if(intersection_x < wall->p1.x || intersection_x > wall->p2.x) {
         return point_null;
     }
     
     double intersection_y = a * intersection_x + b;
+
+    double hit_angle = atan((intersection_x - x) / (intersection_y - y));
+
+    if(fabs(hit_angle - alpha) > M_PI_2) {
+        //intersetion happened behind the viewer
+        return point_null;
+    }
+
     double wall_x = sqrtl(pow((intersection_y - wall->p1.y),2) + pow((intersection_x - wall->p1.x), 2));
     double dist_from_wall = sqrtl(pow((intersection_y - y),2) + pow((intersection_x - x), 2));
     double wall_y = dist_from_wall * tan(beta);

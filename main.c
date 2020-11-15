@@ -42,8 +42,8 @@ int main(int argc, char *argv[]) {
                 case SDL_KEYDOWN:
                     switch(event.key.keysym.sym) {
                         case 'w':
-                            x = x + cos(alpha);
-                            y = y + sin(alpha);
+                            x = x + cos(alpha) * 10;
+                            y = y + sin(alpha) * 10;
                             break;
                         case 'a':
                             alpha -= 0.01f;
@@ -52,11 +52,10 @@ int main(int argc, char *argv[]) {
                             alpha += 0.01f;
                             break;
                         case 's':
-                            x = x - cos(alpha);
-                            y = y - sin(alpha);
+                            x = x - cos(alpha) * 10;
+                            y = y - sin(alpha) * 10;
                             break;
                     }
-                    printf("x: %lf y: %lf alpha: %lf \n", x, y, alpha);
                 break;
             }
         }

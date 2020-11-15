@@ -21,14 +21,14 @@ int main(int argc, char *argv[]) {
     SDL_Renderer *renderer;
     SDL_Window *window;
 
-    Point p1 = {.x = 0, .y = 10};
-    Point p2 = {.x = 20, .y = 10};
+    Point p1 = {.x = 0, .y = 100};
+    Point p2 = {.x = 200, .y = 100};
     Wall w1 = {.p1 = p1, .p2 = p2, .bottom = 0, .top = 200};
     Wall scene_walls[1] = {w1};
     Scene scene = {.walls = scene_walls, .num_walls = 1};
     double x = 0;
     double y = 0;
-    double alpha = 0;
+    double alpha = ANGLE_90;
 
     SDL_Init(SDL_INIT_EVERYTHING);
     SDL_CreateWindowAndRenderer(320, 240, 0, &window, &renderer);

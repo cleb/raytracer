@@ -3,5 +3,6 @@
 typedef struct {
     Point p1;
     Point p2;    
-    double height;
+    double top;
+    double bottom;
 } Wall;

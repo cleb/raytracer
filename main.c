@@ -21,9 +21,9 @@ int main(int argc, char *argv[]) {
     SDL_Renderer *renderer;
     SDL_Window *window;
 
-    Point p1 = {.x = 0, .y = 100};
-    Point p2 = {.x = 200, .y = 100};
-    Wall w1 = {.p1 = p1, .p2 = p2, .bottom = 0, .top = 200};
+    Point p1 = {.x = -200, .y = 1200};
+    Point p2 = {.x = 200, .y = 1200};
+    Wall w1 = {.p1 = p1, .p2 = p2, .bottom = -200, .top = 200};
     Wall scene_walls[1] = {w1};
     Scene scene = {.walls = scene_walls, .num_walls = 1};
     double x = 0;
@@ -56,6 +56,7 @@ int main(int argc, char *argv[]) {
                             y = y - sin(alpha);
                             break;
                     }
+                    printf("x: %lf y: %lf alpha: %lf \n", x, y, alpha);
                 break;
             }
         }

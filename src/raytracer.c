@@ -40,7 +40,7 @@ Point intersects(double x, double y, double alpha, double beta, Wall* wall){
 
 Color render_pixel(double player_x, double player_y, double player_alpha, int pixel_x, int pixel_y, int screen_w, int screen_h, Scene scene) {
     double plane_dist = (screen_w / 2.0f);
-    double alpha = atan((pixel_x - (screen_w / 2))/plane_dist) + player_alpha;
+    double alpha = atan(((screen_w / 2) - pixel_x)/plane_dist) + player_alpha;
     double beta = atan((pixel_y - (screen_h / 2))/plane_dist);
 
     //z-indexing ignored for now, draw the first 

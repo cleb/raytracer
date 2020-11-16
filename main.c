@@ -46,6 +46,8 @@ int main(int argc, char *argv[]) {
     SDL_Init(SDL_INIT_EVERYTHING);
     SDL_CreateWindowAndRenderer(320, 240, 0, &window, &renderer);
     SDL_SetWindowTitle(window, "raytracer");
+    
+    
     while (active) {
         if (SDL_PollEvent(&event)) {
             switch(event.type) {
@@ -59,10 +61,10 @@ int main(int argc, char *argv[]) {
                             y = y + sin(alpha) * 10;
                             break;
                         case 'a':
-                            alpha -= 0.01f;
+                            alpha += 0.01f;
                             break;
                         case 'd':
-                            alpha += 0.01f;
+                            alpha -= 0.01f;
                             break;
                         case 's':
                             x = x - cos(alpha) * 10;
@@ -72,7 +74,7 @@ int main(int argc, char *argv[]) {
                 break;
             }
         }
-            
+
         render(renderer,x,y,alpha,scene);
     }
     SDL_Quit();

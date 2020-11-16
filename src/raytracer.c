@@ -21,9 +21,7 @@ Point intersects(double x, double y, double alpha, double beta, Wall* wall){
     
     double intersection_y = a * intersection_x + b;
 
-    double hit_angle = atan((intersection_x - x) / (intersection_y - y));
-
-    if(fabs(hit_angle - alpha) > M_PI_2) {
+    if((intersection_x - x) / cos(alpha) < 0 || (intersection_y - y) / sin(alpha) < 0 ) {
         //intersetion happened behind the viewer
         return point_null;
     }

@@ -34,8 +34,8 @@ int main(int argc, char *argv[]) {
     SDL_Renderer *renderer;
     SDL_Window *window;
 
-    Point p1 = {.x = -400, .y = 100};
-    Point p2 = {.x = 400, .y = 100};
+    Point p1 = {.x = -400, .y = 400};
+    Point p2 = {.x = 400, .y = 400};
     Wall w1 = {.p1 = p1, .p2 = p2, .bottom = -200, .top = 200};
     Wall scene_walls[1] = {w1};
     Scene scene = {.walls = scene_walls, .num_walls = 1};

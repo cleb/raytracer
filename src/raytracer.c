@@ -38,14 +38,16 @@ Point intersects(double x, double y, double alpha, double beta, Wall* wall){
     return ret;
 }
 
-Color render_pixel(double player_x, double player_y, double player_alpha, int pixel_x, int pixel_y, int screen_w, int screen_h, Scene scene) {
+Color render_pixel(double player_x, double player_y, double player_alpha, int pixel_x, int pixel_z, int screen_w, int screen_h, Scene scene) {
     double plane_dist = (screen_w / 2.0f);
-    double alpha = atan(((screen_w / 2) - pixel_x)/plane_dist) + player_alpha;
-    double beta = atan((pixel_y - (screen_h / 2))/plane_dist);
+    double plane_x_offset = (screen_w / 2) - pixel_x;
+    double plane_z_offset = pixel_z - (screen_h / 2);
+    double alpha = atan(plane_x_offset/plane_dist) + player_alpha;
+    double beta = atan(plane_z_offset/sqrt(pow(plane_x_offset,2) + pow(plane_dist,2)));
 
     //z-indexing ignored for now, draw the first 
     for(int i = 0; i < scene.num_walls; i++) {
-        Point intersection = intersects(player_x,player_y,alpha,beta,&(scene.walls[i]));
+        Point intersection = intersects(player_x, player_y, alpha,beta,&(scene.walls[i]));
         if(intersection.x != point_null.x && intersection.y != point_null.y) {
             Color ret_blue = {.r = 0, .g = 0, .b = 255};
             return ret_blue;

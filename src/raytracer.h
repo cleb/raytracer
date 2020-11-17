@@ -34,7 +34,7 @@ typedef struct {
     double *beta;
 } Render_Canvas;
 
-Color render_pixel(double player_x, double player_y, double player_alpha, int pixel_x, int pixel_y, Render_Canvas *canvas, Render_Scene *scene);
+Color render_pixel(double player_x, double player_y, double player_z, double player_alpha, int pixel_x, int pixel_y, Render_Canvas *canvas, Render_Scene *scene);
 Render_Scene *create_render_scene(Scene *scene);
 Render_Canvas *create_render_canvas(int screen_w, int screen_h);
 void destroy_render_scene(Render_Scene *scene);

@@ -77,7 +77,7 @@ Point get_intersection_point(Render_Wall *wall, double pa, double pb) {
 } 
 
 // returns the coordinates where the ray hit the wall if it hits, point_null otherwise
-Intersection intersects(double x, double y, Angle alpha, Angle beta, Render_Wall* wall){
+Intersection intersects(double x, double y, double z, Angle alpha, Angle beta, Render_Wall* wall){
     double a = wall->a;
     double b = wall->b;
     double tg_alpha = alpha.tg;
@@ -100,7 +100,7 @@ Intersection intersects(double x, double y, Angle alpha, Angle beta, Render_Wall
 
     double wall_x = sqrtl(pow((intersection_y - wall->wall->p1.y),2) + pow((intersection_x - wall->wall->p1.x), 2));
     double dist_from_wall = sqrtl(pow((intersection_y - y),2) + pow((intersection_x - x), 2));
-    double wall_y = dist_from_wall * beta.tg;
+    double wall_y = dist_from_wall * beta.tg + z;
 
     if(wall_y > wall->wall->top || wall_y < wall->wall->bottom ) {
         return intersection_null;
@@ -110,7 +110,7 @@ Intersection intersects(double x, double y, Angle alpha, Angle beta, Render_Wall
     return ret;
 }
 
-Color render_pixel(double player_x, double player_y, double player_alpha, int pixel_x, int pixel_z, Render_Canvas *canvas, Render_Scene *scene) {
+Color render_pixel(double player_x, double player_y, double player_z, double player_alpha, int pixel_x, int pixel_z, Render_Canvas *canvas, Render_Scene *scene) {
     double plane_dist = canvas->plane_dist;
     double alpha = canvas->alpha[pixel_x] + player_alpha;
     double beta = canvas->beta[pixel_z * canvas->screen_w + pixel_x];
@@ -121,7 +121,7 @@ Color render_pixel(double player_x, double player_y, double player_alpha, int pi
     //z-indexing ignored for now, draw the first 
     Color color = {.r = ret_black.r, .g = ret_black.g, .b=ret_black.b};
     for(int i = 0; i < scene->num_walls; i++) {
-        scene->intersection_buffer[i] = intersects(player_x, player_y, alpha_angle,beta_angle,&(scene->walls[i]));
+        scene->intersection_buffer[i] = intersects(player_x, player_y, player_z, alpha_angle,beta_angle,&(scene->walls[i]));
     }   
 
     qsort(scene->intersection_buffer,scene->num_walls,sizeof(Intersection),compare_intersections);
@@ -181,7 +181,7 @@ Render_Canvas *create_render_canvas(int screen_w, int screen_h) {
         double plane_x_offset = screen_w_half - pixel_x;
         ret->alpha[pixel_x] = atan(plane_x_offset/ret ->plane_dist);
         for(int pixel_z = 0; pixel_z < screen_h; pixel_z ++) {
-            double plane_z_offset = pixel_z - screen_h_half;
+            double plane_z_offset = screen_h_half - pixel_z;
             ret->beta[pixel_z * screen_w + pixel_x] = atan(plane_z_offset/sqrt(pow(plane_x_offset,2) + pow(ret->plane_dist,2)));
         }
 

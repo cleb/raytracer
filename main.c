@@ -10,7 +10,7 @@ void render(SDL_Renderer *renderer, double x, double y, double alpha, Render_Can
     for(int s_y = 0; s_y < 240; s_y++) {
         #pragma omp parallel for
         for(int s_x = 0; s_x < 320; s_x++) {
-            colors[s_x][s_y] = render_pixel(x,y,alpha,s_x,s_y,canvas,scene);            
+            colors[s_x][s_y] = render_pixel(x,y,100.0f,alpha,s_x,s_y, canvas,scene);            
         }
     }
 
@@ -50,10 +50,10 @@ int main(int argc, char *argv[]) {
     Point p7 = {.x = 400, .y = 400};
     Point p8 = {.x = 400, .y = 800};
 
-    Wall w1 = {.p1 = p1, .p2 = p2, .bottom = -200, .top = 200, .texture = glass};
-    Wall w2 = {.p1 = p3, .p2 = p4, .bottom = -200, .top = 200, .texture = wall};
-    Wall w3 = {.p1 = p5, .p2 = p6, .bottom = -200, .top = 200, .texture = wall};
-    Wall w4 = {.p1 = p7, .p2 = p8, .bottom = -200, .top = 200, .texture = wall};
+    Wall w1 = {.p1 = p1, .p2 = p2, .bottom = 0, .top = 200, .texture = glass};
+    Wall w2 = {.p1 = p3, .p2 = p4, .bottom = 0, .top = 200, .texture = wall};
+    Wall w3 = {.p1 = p5, .p2 = p6, .bottom = 0, .top = 200, .texture = wall};
+    Wall w4 = {.p1 = p7, .p2 = p8, .bottom = 0, .top = 200, .texture = wall};
     Wall scene_walls[4] = {w1,w2, w3, w4};
     Scene scene = {.walls = scene_walls, .num_walls = 4};
     Render_Scene *render_scene = create_render_scene(&scene);

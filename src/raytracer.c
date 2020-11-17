@@ -11,6 +11,28 @@ Point point_null = {.x = INFINITY, .y = INFINITY};
 Intersection intersection_null = {.point = {.x = INFINITY, .y = INFINITY}, .distance = INFINITY};
 Color ret_black = {.r = 0, .g = 0, .b = 0};
 
+void add_color(Color *c1, Color *c2) {
+    double alpha = c2->alpha/255.0f;    
+    double inverse_alpha = 1 - alpha;
+    c1->r = inverse_alpha * c1->r + alpha * c2->r;
+    c1->g = inverse_alpha * c1->g + alpha * c2->g;
+    c1->b = inverse_alpha * c1->b + alpha * c2->b;
+}
+
+int point_equals(Point p1, Point p2) {
+    return p1.x == p2.x && p1.y == p2.y;
+}
+
+int intersection_equals(Intersection *i1, Intersection *i2) {
+    return i1->distance == i2->distance && point_equals(i1->point, i2->point);
+}
+
+int compare_intersections(const void *b, const void *a) {
+    Intersection *a_intersection = (Intersection*)a;
+    Intersection *b_intersection = (Intersection*)b;
+    return a_intersection->distance > b_intersection->distance ? 1 : -1;
+}
+
 // returns the coordinates where the ray hit the wall if it hits, point_null otherwise
 Intersection intersects(double x, double y, double alpha, double beta, Render_Wall* wall){
     double a = wall->a;
@@ -38,11 +60,11 @@ Intersection intersects(double x, double y, double alpha, double beta, Render_Wa
         return intersection_null;
     }
 
-    Intersection ret = {.point = {.x = wall_x, .y = wall_y}, .distance=dist_from_wall};
+    Intersection ret = {.point = {.x = wall_x, .y = wall_y}, .distance=dist_from_wall, .wall = wall};
     return ret;
 }
 
-Color *render_pixel(double player_x, double player_y, double player_alpha, int pixel_x, int pixel_z, int screen_w, int screen_h, Render_Scene *scene) {
+Color render_pixel(double player_x, double player_y, double player_alpha, int pixel_x, int pixel_z, int screen_w, int screen_h, Render_Scene *scene) {
     double plane_dist = (screen_w / 2.0f);
     double plane_x_offset = (screen_w / 2) - pixel_x;
     double plane_z_offset = pixel_z - (screen_h / 2);
@@ -50,23 +72,32 @@ Color *render_pixel(double player_x, double player_y, double player_alpha, int p
     double beta = atan(plane_z_offset/sqrt(pow(plane_x_offset,2) + pow(plane_dist,2)));
 
     //z-indexing ignored for now, draw the first 
-    double closest_distance = INFINITY;
-    Color *closest_color = &ret_black;
+    Color color = {.r = ret_black.r, .g = ret_black.g, .b=ret_black.b};
     for(int i = 0; i < scene->num_walls; i++) {
-        Intersection intersection = intersects(player_x, player_y, alpha,beta,&(scene->walls[i]));
-        if(intersection.point.x != point_null.x && intersection.point.y != point_null.y && intersection.distance < closest_distance) {
-            closest_distance = intersection.distance;
-            closest_color = get_color(scene->walls[i].wall->texture,intersection.point.x,intersection.point.y);
-        }
+        scene->intersection_buffer[i] = intersects(player_x, player_y, alpha,beta,&(scene->walls[i]));
     }   
+
+    qsort(scene->intersection_buffer,scene->num_walls,sizeof(Intersection),compare_intersections);
+    for(int i = 0; i < scene->num_walls; i++) {
+        Intersection *current_intersection = &scene->intersection_buffer[i];
+        if(!intersection_equals(current_intersection, &intersection_null)) {
+            Color *intersection_color = get_color(current_intersection->wall->wall->texture,
+            current_intersection->point.x,
+            current_intersection->point.y);
+            add_color(&color,intersection_color);            
+        }
+    }
+
+
     
-    return closest_color;
+    return color;
 }
 
 Render_Scene *create_render_scene(Scene *scene) {
     Render_Scene *ret = (Render_Scene *)malloc(sizeof(Render_Scene));
     ret->num_walls = scene->num_walls;
     ret->walls = (Render_Wall *)malloc(scene->num_walls * sizeof(Render_Wall));
+    ret->intersection_buffer = (Intersection *)malloc(scene->num_walls * sizeof(Intersection));
     for(int i = 0; i < scene->num_walls; i++) {
         Wall *wall = &scene->walls[i];
         ret->walls[i].wall = &scene->walls[i];
@@ -81,3 +112,4 @@ void destroy_render_scene(Render_Scene *scene) {
     free(scene->walls);
     free(scene);
 }
+

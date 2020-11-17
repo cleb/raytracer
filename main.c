@@ -1,11 +1,12 @@
 #include <SDL2/SDL.h>
+
 #include "src/raytracer.h"
 #include "src/texture_loader.h"
 
 
 
 void render(SDL_Renderer *renderer, double x, double y, double alpha, Render_Scene *scene) {
-    Color *colors[320][240];
+    Color colors[320][240];
     for(int s_y = 0; s_y < 240; s_y++) {
         #pragma omp parallel for
         for(int s_x = 0; s_x < 320; s_x++) {
@@ -16,7 +17,7 @@ void render(SDL_Renderer *renderer, double x, double y, double alpha, Render_Sce
     for(int s_y = 0; s_y < 240; s_y++) {
             #pragma omp parallel for
             for(int s_x = 0; s_x < 320; s_x++) {
-                SDL_SetRenderDrawColor(renderer, colors[s_x][s_y]->r, colors[s_x][s_y]->g, colors[s_x][s_y]->b, 255);
+                SDL_SetRenderDrawColor(renderer, colors[s_x][s_y].r, colors[s_x][s_y].g, colors[s_x][s_y].b, 255);
                 SDL_RenderDrawPoint(renderer, s_x, s_y);
             }
     }
@@ -35,13 +36,14 @@ int main(int argc, char *argv[]) {
     SDL_SetWindowTitle(window, "raytracer");
 
     Texture *wall = load_texture("./wall.jpg");
+    Texture *glass = load_texture("./glass.png");
 
     Point p1 = {.x = -400, .y = 400};
     Point p2 = {.x = 400, .y = 400};
 
-    Point p3 = {.x = -400, .y = 600};
+    Point p3 = {.x = -400, .y = 400};
     Point p4 = {.x = 400, .y = 600};
-    Wall w1 = {.p1 = p1, .p2 = p2, .bottom = -200, .top = 200, .texture = wall};
+    Wall w1 = {.p1 = p1, .p2 = p2, .bottom = -200, .top = 200, .texture = glass};
     Wall w2 = {.p1 = p3, .p2 = p4, .bottom = -200, .top = 200, .texture = wall};
     Wall scene_walls[2] = {w1,w2};
     Scene scene = {.walls = scene_walls, .num_walls = 2};

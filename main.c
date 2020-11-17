@@ -5,12 +5,12 @@
 
 
 
-void render(SDL_Renderer *renderer, double x, double y, double alpha, Render_Scene *scene) {
+void render(SDL_Renderer *renderer, double x, double y, double alpha, Render_Canvas *canvas, Render_Scene *scene) {
     Color colors[320][240];
     for(int s_y = 0; s_y < 240; s_y++) {
         #pragma omp parallel for
         for(int s_x = 0; s_x < 320; s_x++) {
-            colors[s_x][s_y] = render_pixel(x,y,alpha,s_x,s_y,320,240,scene);            
+            colors[s_x][s_y] = render_pixel(x,y,alpha,s_x,s_y,canvas,scene);            
         }
     }
 
@@ -57,6 +57,9 @@ int main(int argc, char *argv[]) {
     Wall scene_walls[4] = {w1,w2, w3, w4};
     Scene scene = {.walls = scene_walls, .num_walls = 4};
     Render_Scene *render_scene = create_render_scene(&scene);
+    Render_Canvas *canvas = create_render_canvas(320,240);
+
+
     double x = 0;
     double y = 0;
     double alpha = ANGLE_90;
@@ -89,8 +92,9 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        render(renderer,x,y,alpha,render_scene);
+        render(renderer,x,y,alpha,canvas,render_scene);
     }
+    destroy_render_canvas(canvas);
     destroy_render_scene(render_scene);
     destroy_texture(wall);
     SDL_Quit();

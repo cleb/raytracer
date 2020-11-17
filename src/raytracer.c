@@ -11,6 +11,24 @@ Point point_null = {.x = INFINITY, .y = INFINITY};
 Intersection intersection_null = {.point = {.x = INFINITY, .y = INFINITY}, .distance = INFINITY};
 Color ret_black = {.r = 0, .g = 0, .b = 0};
 
+typedef struct {
+    double angle;
+    double tg;
+    double sin;
+    double cos;
+} Angle;
+
+Angle create_angle(double angle) {
+    Angle ret = {.angle = angle, .tg = tan(angle), .sin = sin(angle), .cos = cos(angle)};
+    return ret;
+}
+
+Angle create_angle_only_tg(double angle) {
+    Angle ret = {.angle = angle, .tg = tan(angle), .sin = INFINITY, .cos = INFINITY};
+    return ret;
+}
+
+
 void add_color(Color *c1, Color *c2) {
     double alpha = c2->alpha/255.0f;    
     double inverse_alpha = 1 - alpha;
@@ -59,10 +77,10 @@ Point get_intersection_point(Render_Wall *wall, double pa, double pb) {
 } 
 
 // returns the coordinates where the ray hit the wall if it hits, point_null otherwise
-Intersection intersects(double x, double y, double alpha, double beta, Render_Wall* wall){
+Intersection intersects(double x, double y, Angle alpha, Angle beta, Render_Wall* wall){
     double a = wall->a;
     double b = wall->b;
-    double tg_alpha = tan(alpha);
+    double tg_alpha = alpha.tg;
     double pa = tg_alpha;
     double pb = y - x * tg_alpha;
     
@@ -75,14 +93,14 @@ Intersection intersects(double x, double y, double alpha, double beta, Render_Wa
     double intersection_x = intersection.x;
     double intersection_y = intersection.y;
 
-    if((intersection_x - x) / cos(alpha) < 0 || (intersection_y - y) / sin(alpha) < 0 ) {
+    if((intersection_x - x) / alpha.cos < 0 || (intersection_y - y) / alpha.sin < 0 ) {
         //intersetion happened behind the viewer
         return intersection_null;
     }
 
     double wall_x = sqrtl(pow((intersection_y - wall->wall->p1.y),2) + pow((intersection_x - wall->wall->p1.x), 2));
     double dist_from_wall = sqrtl(pow((intersection_y - y),2) + pow((intersection_x - x), 2));
-    double wall_y = dist_from_wall * tan(beta);
+    double wall_y = dist_from_wall * beta.tg;
 
     if(wall_y > wall->wall->top || wall_y < wall->wall->bottom ) {
         return intersection_null;
@@ -99,10 +117,13 @@ Color render_pixel(double player_x, double player_y, double player_alpha, int pi
     double alpha = atan(plane_x_offset/plane_dist) + player_alpha;
     double beta = atan(plane_z_offset/sqrt(pow(plane_x_offset,2) + pow(plane_dist,2)));
 
+    Angle alpha_angle = create_angle(alpha);
+    Angle beta_angle = create_angle_only_tg(beta);
+
     //z-indexing ignored for now, draw the first 
     Color color = {.r = ret_black.r, .g = ret_black.g, .b=ret_black.b};
     for(int i = 0; i < scene->num_walls; i++) {
-        scene->intersection_buffer[i] = intersects(player_x, player_y, alpha,beta,&(scene->walls[i]));
+        scene->intersection_buffer[i] = intersects(player_x, player_y, alpha_angle,beta_angle,&(scene->walls[i]));
     }   
 
     qsort(scene->intersection_buffer,scene->num_walls,sizeof(Intersection),compare_intersections);

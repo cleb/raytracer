@@ -4,8 +4,10 @@
 #include "color.h"
 #include "scene.h"
 #include "raytracer.h"
+#include "texture.h"
 
 Point point_null = {.x = INFINITY, .y = INFINITY};
+Color ret_black = {.r = 0, .g = 0, .b = 0};
 
 // returns the coordinates where the ray hit the wall if it hits, point_null otherwise
 Point intersects(double x, double y, double alpha, double beta, Wall* wall){
@@ -38,7 +40,7 @@ Point intersects(double x, double y, double alpha, double beta, Wall* wall){
     return ret;
 }
 
-Color render_pixel(double player_x, double player_y, double player_alpha, int pixel_x, int pixel_z, int screen_w, int screen_h, Scene scene) {
+Color *render_pixel(double player_x, double player_y, double player_alpha, int pixel_x, int pixel_z, int screen_w, int screen_h, Scene scene) {
     double plane_dist = (screen_w / 2.0f);
     double plane_x_offset = (screen_w / 2) - pixel_x;
     double plane_z_offset = pixel_z - (screen_h / 2);
@@ -49,10 +51,9 @@ Color render_pixel(double player_x, double player_y, double player_alpha, int pi
     for(int i = 0; i < scene.num_walls; i++) {
         Point intersection = intersects(player_x, player_y, alpha,beta,&(scene.walls[i]));
         if(intersection.x != point_null.x && intersection.y != point_null.y) {
-            Color ret_blue = {.r = 0, .g = 0, .b = 255};
-            return ret_blue;
+            return get_color(scene.walls[i].texture,intersection.x,intersection.y);
         }
     }   
-    Color ret_black = {.r = 0, .g = 0, .b = 0};
-    return ret_black;
+    
+    return &ret_black;
 }

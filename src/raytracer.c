@@ -33,6 +33,31 @@ int compare_intersections(const void *b, const void *a) {
     return a_intersection->distance > b_intersection->distance ? 1 : -1;
 }
 
+Point get_intersection_point(Render_Wall *wall, double pa, double pb) {
+    if(wall->wall->p1.x != wall->wall->p2.x){
+        double a = wall->a;
+        double b = wall->b;
+        
+        double intersection_x = (b - pb) / (pa - a);
+        if(intersection_x < wall->wall->p1.x || intersection_x > wall->wall->p2.x) {
+            return point_null;
+        }
+        
+        double intersection_y = a * intersection_x + b;
+        Point ret = {.x = intersection_x, .y = intersection_y};
+        return ret;
+    }
+
+
+    double intersection_straight_x = wall->wall->p1.x;
+    double intersection_straight_y = pa * intersection_straight_x + pb;
+    if(intersection_straight_y < wall->wall->p1.y || intersection_straight_y > wall->wall->p2.y) {
+        return point_null;
+    }
+    Point ret_straight = {.x = intersection_straight_x, .y = intersection_straight_y};
+        return ret_straight;
+} 
+
 // returns the coordinates where the ray hit the wall if it hits, point_null otherwise
 Intersection intersects(double x, double y, double alpha, double beta, Render_Wall* wall){
     double a = wall->a;
@@ -40,12 +65,15 @@ Intersection intersects(double x, double y, double alpha, double beta, Render_Wa
     double tg_alpha = tan(alpha);
     double pa = tg_alpha;
     double pb = y - x * tg_alpha;
-    double intersection_x = (b - pb) / (pa - a);
-    if(intersection_x < wall->wall->p1.x || intersection_x > wall->wall->p2.x) {
+    
+    Point intersection = get_intersection_point(wall, pa, pb);
+
+    if(point_equals(intersection, point_null)) {
         return intersection_null;
     }
-    
-    double intersection_y = a * intersection_x + b;
+
+    double intersection_x = intersection.x;
+    double intersection_y = intersection.y;
 
     if((intersection_x - x) / cos(alpha) < 0 || (intersection_y - y) / sin(alpha) < 0 ) {
         //intersetion happened behind the viewer
@@ -101,10 +129,15 @@ Render_Scene *create_render_scene(Scene *scene) {
     for(int i = 0; i < scene->num_walls; i++) {
         Wall *wall = &scene->walls[i];
         ret->walls[i].wall = &scene->walls[i];
-        double a = (wall->p2.y - wall->p1.y) / (wall->p2.x - wall->p1.x);
-        double b = wall->p1.y - a*wall->p1.x;
-        ret->walls[i].a = a;
-        ret->walls[i].b = b;
+        if(wall->p1.x != wall->p2.x) {
+            double a = (wall->p2.y - wall->p1.y) / (wall->p2.x - wall->p1.x);
+            double b = wall->p1.y - a*wall->p1.x;
+            ret->walls[i].a = a;
+            ret->walls[i].b = b;
+        } else {
+            ret->walls[i].a = INFINITY;
+            ret->walls[i].b = INFINITY;
+        }
     }
     return ret;
 }

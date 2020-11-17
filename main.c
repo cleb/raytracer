@@ -41,12 +41,21 @@ int main(int argc, char *argv[]) {
     Point p1 = {.x = -400, .y = 400};
     Point p2 = {.x = 400, .y = 400};
 
-    Point p3 = {.x = -400, .y = 400};
-    Point p4 = {.x = 400, .y = 600};
+    Point p3 = {.x = -400, .y = 800};
+    Point p4 = {.x = 400, .y = 800};
+
+    Point p5 = {.x = -400, .y = 400};
+    Point p6 = {.x = -400, .y = 800};
+
+    Point p7 = {.x = 400, .y = 400};
+    Point p8 = {.x = 400, .y = 800};
+
     Wall w1 = {.p1 = p1, .p2 = p2, .bottom = -200, .top = 200, .texture = glass};
     Wall w2 = {.p1 = p3, .p2 = p4, .bottom = -200, .top = 200, .texture = wall};
-    Wall scene_walls[2] = {w1,w2};
-    Scene scene = {.walls = scene_walls, .num_walls = 2};
+    Wall w3 = {.p1 = p5, .p2 = p6, .bottom = -200, .top = 200, .texture = wall};
+    Wall w4 = {.p1 = p7, .p2 = p8, .bottom = -200, .top = 200, .texture = wall};
+    Wall scene_walls[4] = {w1,w2, w3, w4};
+    Scene scene = {.walls = scene_walls, .num_walls = 4};
     Render_Scene *render_scene = create_render_scene(&scene);
     double x = 0;
     double y = 0;

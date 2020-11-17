@@ -43,9 +43,13 @@ int main(int argc, char *argv[]) {
 
     Point p1 = {.x = -400, .y = 400};
     Point p2 = {.x = 400, .y = 400};
+
+    Point p3 = {.x = -400, .y = 600};
+    Point p4 = {.x = 400, .y = 600};
     Wall w1 = {.p1 = p1, .p2 = p2, .bottom = -200, .top = 200, .texture = wall};
-    Wall scene_walls[1] = {w1};
-    Scene scene = {.walls = scene_walls, .num_walls = 1};
+    Wall w2 = {.p1 = p3, .p2 = p4, .bottom = -200, .top = 200, .texture = wall};
+    Wall scene_walls[2] = {w1,w2};
+    Scene scene = {.walls = scene_walls, .num_walls = 2};
     double x = 0;
     double y = 0;
     double alpha = ANGLE_90;

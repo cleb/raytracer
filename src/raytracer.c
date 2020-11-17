@@ -110,12 +110,10 @@ Intersection intersects(double x, double y, Angle alpha, Angle beta, Render_Wall
     return ret;
 }
 
-Color render_pixel(double player_x, double player_y, double player_alpha, int pixel_x, int pixel_z, int screen_w, int screen_h, Render_Scene *scene) {
-    double plane_dist = (screen_w / 2.0f);
-    double plane_x_offset = (screen_w / 2) - pixel_x;
-    double plane_z_offset = pixel_z - (screen_h / 2);
-    double alpha = atan(plane_x_offset/plane_dist) + player_alpha;
-    double beta = atan(plane_z_offset/sqrt(pow(plane_x_offset,2) + pow(plane_dist,2)));
+Color render_pixel(double player_x, double player_y, double player_alpha, int pixel_x, int pixel_z, Render_Canvas *canvas, Render_Scene *scene) {
+    double plane_dist = canvas->plane_dist;
+    double alpha = canvas->alpha[pixel_x] + player_alpha;
+    double beta = canvas->beta[pixel_z * canvas->screen_w + pixel_x];
 
     Angle alpha_angle = create_angle(alpha);
     Angle beta_angle = create_angle_only_tg(beta);
@@ -165,5 +163,35 @@ Render_Scene *create_render_scene(Scene *scene) {
 void destroy_render_scene(Render_Scene *scene) {
     free(scene->walls);
     free(scene);
+}
+
+Render_Canvas *create_render_canvas(int screen_w, int screen_h) {
+    Render_Canvas *ret = (Render_Canvas *)malloc(sizeof(Render_Canvas));
+    ret->screen_w = screen_w;
+    ret->screen_h = screen_h;
+    ret->plane_dist = (screen_w / 2.0f);
+    ret->alpha = (double *)malloc(ret->screen_w * sizeof(double));
+    ret->beta = (double *)malloc(ret->screen_h * ret->screen_w * sizeof(double));
+
+    
+    int screen_w_half = screen_w / 2;
+    int screen_h_half = screen_h / 2;
+
+    for(int pixel_x = 0; pixel_x < screen_w; pixel_x ++) {
+        double plane_x_offset = screen_w_half - pixel_x;
+        ret->alpha[pixel_x] = atan(plane_x_offset/ret ->plane_dist);
+        for(int pixel_z = 0; pixel_z < screen_h; pixel_z ++) {
+            double plane_z_offset = pixel_z - screen_h_half;
+            ret->beta[pixel_z * screen_w + pixel_x] = atan(plane_z_offset/sqrt(pow(plane_x_offset,2) + pow(ret->plane_dist,2)));
+        }
+
+    }
+    return ret;
+}
+
+void destroy_render_canvas(Render_Canvas *canvas) {
+    free(canvas->alpha);
+    free(canvas->beta);
+    free(canvas);
 }
 

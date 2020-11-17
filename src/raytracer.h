@@ -17,12 +17,13 @@ typedef struct {
 typedef struct {
     double distance;
     Point point;
-    Render_Wall *wall;
+    Texture *texture;
 } Intersection;
 
 typedef struct {
     Render_Wall *walls;
-    int num_walls;        
+    int num_walls;   
+    Texture *floor;     
     Intersection *intersection_buffer;
 } Render_Scene;
 

@@ -23,9 +23,14 @@ Angle create_angle(double angle) {
     return ret;
 }
 
-Angle create_angle_only_tg(double angle) {
-    Angle ret = {.angle = angle, .tg = tan(angle), .sin = INFINITY, .cos = INFINITY};
-    return ret;
+void copy_point(Point *src, Point *dest) {
+    dest->x = src->x;
+    dest->y = src->y;
+}
+
+void copy_intersection(Intersection *src, Intersection *dest) {
+    dest->distance = src->distance;
+    copy_point(&src->point, &dest->point);    
 }
 
 
@@ -106,7 +111,7 @@ Intersection intersects(double x, double y, double z, Angle alpha, Angle beta, R
         return intersection_null;
     }
 
-    Intersection ret = {.point = {.x = wall_x, .y = wall_y}, .distance=dist_from_wall, .wall = wall};
+    Intersection ret = {.point = {.x = wall_x, .y = wall_y}, .distance=dist_from_wall, .texture = wall->wall->texture};
     return ret;
 }
 
@@ -116,7 +121,7 @@ Color render_pixel(double player_x, double player_y, double player_z, double pla
     double beta = canvas->beta[pixel_z * canvas->screen_w + pixel_x];
 
     Angle alpha_angle = create_angle(alpha);
-    Angle beta_angle = create_angle_only_tg(beta);
+    Angle beta_angle = create_angle(beta);
 
     //z-indexing ignored for now, draw the first 
     Color color = {.r = ret_black.r, .g = ret_black.g, .b=ret_black.b};
@@ -124,11 +129,26 @@ Color render_pixel(double player_x, double player_y, double player_z, double pla
         scene->intersection_buffer[i] = intersects(player_x, player_y, player_z, alpha_angle,beta_angle,&(scene->walls[i]));
     }   
 
-    qsort(scene->intersection_buffer,scene->num_walls,sizeof(Intersection),compare_intersections);
-    for(int i = 0; i < scene->num_walls; i++) {
+    if(beta_angle.sin < 0) {
+        double inverse_beta = M_PI_2 - beta_angle.angle;
+        double floor_dist = tan(inverse_beta) * player_z * -1;
+        double ray_floor_dist = sqrt(pow(floor_dist,2) + pow(player_z,2));
+        scene->intersection_buffer[scene->num_walls].distance = ray_floor_dist;
+        Point floor_intersect = {.x = floor_dist * alpha_angle.cos + player_x, .y = floor_dist * alpha_angle.sin + player_y};
+        scene->intersection_buffer[scene->num_walls].point = floor_intersect;
+        scene->intersection_buffer[scene->num_walls].texture = scene->floor;
+    } else {
+        copy_intersection(&intersection_null, &scene->intersection_buffer[scene->num_walls]);
+    }
+
+    qsort(scene->intersection_buffer,scene->num_walls + 1,sizeof(Intersection),compare_intersections);
+
+    
+
+    for(int i = 0; i < scene->num_walls + 1; i++) {
         Intersection *current_intersection = &scene->intersection_buffer[i];
         if(!intersection_equals(current_intersection, &intersection_null)) {
-            Color *intersection_color = get_color(current_intersection->wall->wall->texture,
+            Color *intersection_color = get_color(current_intersection->texture,
             current_intersection->point.x,
             current_intersection->point.y);
             add_color(&color,intersection_color);            
@@ -144,7 +164,8 @@ Render_Scene *create_render_scene(Scene *scene) {
     Render_Scene *ret = (Render_Scene *)malloc(sizeof(Render_Scene));
     ret->num_walls = scene->num_walls;
     ret->walls = (Render_Wall *)malloc(scene->num_walls * sizeof(Render_Wall));
-    ret->intersection_buffer = (Intersection *)malloc(scene->num_walls * sizeof(Intersection));
+    ret->intersection_buffer = (Intersection *)malloc((scene->num_walls + 1) * sizeof(Intersection));
+    ret->floor = scene->floor;
     for(int i = 0; i < scene->num_walls; i++) {
         Wall *wall = &scene->walls[i];
         ret->walls[i].wall = &scene->walls[i];

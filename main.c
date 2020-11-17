@@ -36,6 +36,7 @@ int main(int argc, char *argv[]) {
     SDL_SetWindowTitle(window, "raytracer");
 
     Texture *wall = load_texture("./wall.jpg");
+    Texture *floor = load_texture("./floor.jpg");
     Texture *glass = load_texture("./glass.png");
 
     Point p1 = {.x = -400, .y = 400};
@@ -55,7 +56,7 @@ int main(int argc, char *argv[]) {
     Wall w3 = {.p1 = p5, .p2 = p6, .bottom = 0, .top = 200, .texture = wall};
     Wall w4 = {.p1 = p7, .p2 = p8, .bottom = 0, .top = 200, .texture = wall};
     Wall scene_walls[4] = {w1,w2, w3, w4};
-    Scene scene = {.walls = scene_walls, .num_walls = 4};
+    Scene scene = {.walls = scene_walls, .num_walls = 4, .floor = floor};
     Render_Scene *render_scene = create_render_scene(&scene);
     Render_Canvas *canvas = create_render_canvas(320,240);
 
@@ -97,6 +98,8 @@ int main(int argc, char *argv[]) {
     destroy_render_canvas(canvas);
     destroy_render_scene(render_scene);
     destroy_texture(wall);
+    destroy_texture(glass);
+    destroy_texture(floor);
     SDL_Quit();
     return 0;
 }

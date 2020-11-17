@@ -4,7 +4,7 @@
 
 
 
-void render(SDL_Renderer *renderer, double x, double y, double alpha, Scene scene) {
+void render(SDL_Renderer *renderer, double x, double y, double alpha, Render_Scene *scene) {
     Color *colors[320][240];
     for(int s_y = 0; s_y < 240; s_y++) {
         #pragma omp parallel for
@@ -20,12 +20,7 @@ void render(SDL_Renderer *renderer, double x, double y, double alpha, Scene scen
                 SDL_RenderDrawPoint(renderer, s_x, s_y);
             }
     }
-
-    SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
-    SDL_RenderDrawLine(renderer, scene.walls[0].p1.x / 100 + 100,scene.walls[0].p1.y / 100 + 100,scene.walls[0].p2.x / 100 + 100,scene.walls[0].p2.y / 100 + 100);
-    SDL_RenderDrawLine(renderer, x / 100 + 100,y / 100 + 100,(x + 1000* cos(alpha + M_PI_4)) / 100 + 100,(y + 1000* sin(alpha + M_PI_4)) /100 + 100);
-    SDL_RenderDrawLine(renderer, x / 100 + 100,y / 100 + 100,(x + 1000* cos(alpha - M_PI_4)) /100 + 100,(y + 1000* sin(alpha - M_PI_4)) /100 + 100);
-
+    
     SDL_RenderPresent(renderer);
 }
 
@@ -50,6 +45,7 @@ int main(int argc, char *argv[]) {
     Wall w2 = {.p1 = p3, .p2 = p4, .bottom = -200, .top = 200, .texture = wall};
     Wall scene_walls[2] = {w1,w2};
     Scene scene = {.walls = scene_walls, .num_walls = 2};
+    Render_Scene *render_scene = create_render_scene(&scene);
     double x = 0;
     double y = 0;
     double alpha = ANGLE_90;
@@ -82,8 +78,9 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        render(renderer,x,y,alpha,scene);
+        render(renderer,x,y,alpha,render_scene);
     }
+    destroy_render_scene(render_scene);
     destroy_texture(wall);
     SDL_Quit();
     return 0;

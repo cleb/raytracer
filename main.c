@@ -51,10 +51,10 @@ int main(int argc, char *argv[]) {
     Point p7 = {.x = 400, .y = 400};
     Point p8 = {.x = 400, .y = 800};
 
-    Wall w1 = {.p1 = p1, .p2 = p2, .bottom = 0, .top = 200, .texture = glass};
-    Wall w2 = {.p1 = p3, .p2 = p4, .bottom = 0, .top = 200, .texture = wall};
-    Wall w3 = {.p1 = p5, .p2 = p6, .bottom = 0, .top = 200, .texture = wall};
-    Wall w4 = {.p1 = p7, .p2 = p8, .bottom = 0, .top = 200, .texture = wall};
+    Wall w1 = {.p1 = p1, .p2 = p2, .bottom = 0, .top = 200, .texture = glass, .reflexivity = 0.5};
+    Wall w2 = {.p1 = p3, .p2 = p4, .bottom = 0, .top = 200, .texture = wall, .reflexivity = 0};
+    Wall w3 = {.p1 = p5, .p2 = p6, .bottom = 0, .top = 200, .texture = glass, .reflexivity = 0.5};
+    Wall w4 = {.p1 = p7, .p2 = p8, .bottom = 0, .top = 200, .texture = wall, .reflexivity = 0};
     Wall scene_walls[4] = {w1,w2, w3, w4};
     Scene scene = {.walls = scene_walls, .num_walls = 4, .floor = floor};
     Render_Scene *render_scene = create_render_scene(&scene);
@@ -62,8 +62,8 @@ int main(int argc, char *argv[]) {
 
 
     double x = 0;
-    double y = 0;
-    double alpha = ANGLE_90;
+    double y = 600;
+    double alpha = ANGLE_270;
     
     
     while (active) {
@@ -79,10 +79,10 @@ int main(int argc, char *argv[]) {
                             y = y + sin(alpha) * 10;
                             break;
                         case 'a':
-                            alpha += 0.01f;
+                            alpha += 0.1f;
                             break;
                         case 'd':
-                            alpha -= 0.01f;
+                            alpha -= 0.1f;
                             break;
                         case 's':
                             x = x - cos(alpha) * 10;

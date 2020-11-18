@@ -6,5 +6,6 @@ typedef struct {
     Point p2;    
     double top;
     double bottom;
+    double reflexivity;
     Texture *texture;
 } Wall;

@@ -12,12 +12,16 @@ typedef struct {
     Wall *wall;
     double a;
     double b;
+    double angle;
 } Render_Wall;
 
 typedef struct {
     double distance;
     Point point;
+    Point_3 point_in_space;
     Texture *texture;
+    double reflexivity;
+    double angle;
 } Intersection;
 
 typedef struct {
@@ -25,6 +29,7 @@ typedef struct {
     int num_walls;   
     Texture *floor;     
     Intersection *intersection_buffer;
+    int max_bounce;
 } Render_Scene;
 
 typedef struct {

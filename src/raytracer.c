@@ -11,6 +11,8 @@ Point point_null = {.x = INFINITY, .y = INFINITY};
 Intersection intersection_null = {.point = {.x = INFINITY, .y = INFINITY}, .distance = INFINITY, .reflexivity = INFINITY};
 Color ret_black = {.r = 0, .g = 0, .b = 0};
 
+Color trace_ray(double player_x, double player_y, double player_z, double alpha, double beta, Render_Scene *scene, int max_bounce);
+
 void copy_point(Point *src, Point *dest) {
     dest->x = src->x;
     dest->y = src->y;
@@ -157,6 +159,25 @@ Intersection intersects_floor(Angle alpha, Angle beta, double player_x, double p
     return ret;
 }
 
+void follow_ray(Color *color, Intersection *intersection, double alpha, double beta, Render_Scene * scene, int max_bounce) {
+    if(intersection->reflexivity > 0 && max_bounce > 0) {
+        double new_alpha = 2 * intersection->angle - alpha;
+        double new_beta = beta;
+
+        Color reflection_color = trace_ray(
+            intersection->point_in_space.x + cos(new_alpha), 
+            intersection->point_in_space.y + sin(new_alpha), 
+            intersection->point_in_space.z, 
+            new_alpha,
+            new_beta, 
+            scene,
+            max_bounce - 1
+        );
+        reflection_color.alpha = intersection->reflexivity * 255;
+        add_color(color, &reflection_color);
+    }
+}
+
 Color trace_ray(double player_x, double player_y, double player_z, double alpha, double beta, Render_Scene *scene, int max_bounce){
     Angle alpha_angle = create_angle(alpha);
     Angle beta_angle = create_angle(beta);
@@ -175,8 +196,6 @@ Color trace_ray(double player_x, double player_y, double player_z, double alpha,
 
     qsort(intersection_buffer,scene->num_walls + 1,sizeof(Intersection),compare_intersections);
 
-    
-
     for(int i = 0; i < scene->num_walls + 1; i++) {
         Intersection *current_intersection = &intersection_buffer[i];
         if(!intersection_equals(current_intersection, &intersection_null)) {
@@ -184,22 +203,7 @@ Color trace_ray(double player_x, double player_y, double player_z, double alpha,
             current_intersection->point.x,
             current_intersection->point.y);
             add_color(&color,intersection_color);            
-            if(current_intersection->reflexivity > 0 && max_bounce > 0) {
-                double new_alpha = 2 * current_intersection->angle - alpha;
-                double new_beta = beta;
-
-                Color reflection_color = trace_ray(
-                    current_intersection->point_in_space.x + cos(new_alpha), 
-                    current_intersection->point_in_space.y + sin(new_alpha), 
-                    current_intersection->point_in_space.z, 
-                    new_alpha,
-                    new_beta, 
-                    scene,
-                    max_bounce - 1
-                );
-                reflection_color.alpha = current_intersection->reflexivity * 255;
-                add_color(&color, &reflection_color);
-            }
+            follow_ray(&color, current_intersection, alpha, beta, scene, max_bounce);
         }
     }
     

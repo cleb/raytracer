@@ -11,13 +11,6 @@ Point point_null = {.x = INFINITY, .y = INFINITY};
 Intersection intersection_null = {.point = {.x = INFINITY, .y = INFINITY}, .distance = INFINITY, .reflexivity = INFINITY};
 Color ret_black = {.r = 0, .g = 0, .b = 0};
 
-typedef struct {
-    double angle;
-    double tg;
-    double sin;
-    double cos;
-} Angle;
-
 Angle create_angle(double angle) {
     Angle ret = {.angle = angle, .tg = tan(angle), .sin = sin(angle), .cos = cos(angle)};
     return ret;
@@ -132,6 +125,7 @@ Color trace_ray(double player_x, double player_y, double player_z, double alpha,
     Angle beta_angle = create_angle(beta);
     Color color = {.r = ret_black.r, .g = ret_black.g, .b=ret_black.b};
     Intersection *intersection_buffer = get_intersection_buffer(scene,max_bounce);
+    #pragma omp parallel for
     for(int i = 0; i < scene->num_walls; i++) {
         intersection_buffer[i] = intersects(player_x, player_y, player_z, alpha_angle,beta_angle,&(scene->walls[i]));
     }   

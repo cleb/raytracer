@@ -16,6 +16,19 @@ START_TEST(test_intersects_direct)
 }
 END_TEST
 
+START_TEST(test_intersects_angle)
+{
+    Point p1 = {.x = -10, .y = -15};
+    Point p2 = {.x = 10, .y = 5};
+    Wall wall_data = {.p1 = p1, .p2 = p2, .bottom = -100, .top = 100};
+    Render_Wall wall = {.a = 1, .b = -5, .wall = &wall_data};
+    Angle alpha = {.angle = 0, .cos = 1, .sin = 0, .tg= 0};
+    Angle beta = {.angle = 0, .cos = 1, .sin = 0, .tg= 0};
+    Intersection intersection = intersects(0,0,0,alpha,beta, &wall);
+    ck_assert_double_eq(5,intersection.distance);
+}
+END_TEST
+
 START_TEST(test_intersects_miss)
 {
     Point p1 = {.x = -100, .y = 10};
@@ -42,6 +55,7 @@ Suite * raytracer_suite(void)
 
     tcase_add_test(tc_core, test_intersects_direct);
     tcase_add_test(tc_core, test_intersects_miss);
+    tcase_add_test(tc_core, test_intersects_angle);
     suite_add_tcase(s, tc_core);
 
     return s;

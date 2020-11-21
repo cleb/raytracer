@@ -11,11 +11,6 @@ Point point_null = {.x = INFINITY, .y = INFINITY};
 Intersection intersection_null = {.point = {.x = INFINITY, .y = INFINITY}, .distance = INFINITY, .reflexivity = INFINITY};
 Color ret_black = {.r = 0, .g = 0, .b = 0};
 
-Angle create_angle(double angle) {
-    Angle ret = {.angle = angle, .tg = tan(angle), .sin = sin(angle), .cos = cos(angle)};
-    return ret;
-}
-
 void copy_point(Point *src, Point *dest) {
     dest->x = src->x;
     dest->y = src->y;

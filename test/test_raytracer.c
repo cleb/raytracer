@@ -1,6 +1,7 @@
 #include <check.h>
 #include <math.h>
 #include "../src/raytracer.h"
+#include "../src/angle.h"
 #include "./raytracer_private_api.h"
 
 START_TEST(test_intersects_direct)
@@ -42,6 +43,26 @@ START_TEST(test_intersects_miss)
 }
 END_TEST
 
+START_TEST(test_create_angle_0)
+{
+    Angle angle = create_angle(0);
+    ck_assert_double_eq(0, angle.angle);
+    ck_assert_double_eq(sin(0), angle.sin);
+    ck_assert_double_eq(cos(0), angle.cos);
+    ck_assert_double_eq(tan(0), angle.tg);
+}
+END_TEST
+
+START_TEST(test_create_angle_90)
+{
+    Angle angle = create_angle(M_PI_2);
+    ck_assert_double_eq(M_PI_2, angle.angle);
+    ck_assert_double_eq(sin(M_PI_2), angle.sin);
+    ck_assert_double_eq(cos(M_PI_2), angle.cos);
+    ck_assert_double_eq(tan(M_PI_2), angle.tg);
+}
+END_TEST
+
 
 Suite * raytracer_suite(void)
 {
@@ -56,6 +77,8 @@ Suite * raytracer_suite(void)
     tcase_add_test(tc_core, test_intersects_direct);
     tcase_add_test(tc_core, test_intersects_miss);
     tcase_add_test(tc_core, test_intersects_angle);
+    tcase_add_test(tc_core, test_create_angle_0);
+    tcase_add_test(tc_core, test_create_angle_90);
     suite_add_tcase(s, tc_core);
 
     return s;

@@ -4,6 +4,7 @@
 #include "point.h"
 #include "color.h"
 #include "scene.h"
+#include "angle.h"
 #define ANGLE_90 (M_PI / 2)
 #define ANGLE_180 M_PI
 #define ANGLE_270 (M_PI * 3 / 2)
@@ -39,14 +40,6 @@ typedef struct {
     double *alpha;
     double *beta;
 } Render_Canvas;
-
-
-typedef struct {
-    double angle;
-    double tg;
-    double sin;
-    double cos;
-} Angle;
 
 Color render_pixel(double player_x, double player_y, double player_z, double player_alpha, int pixel_x, int pixel_y, Render_Canvas *canvas, Render_Scene *scene);
 Render_Scene *create_render_scene(Scene *scene);

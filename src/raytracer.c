@@ -50,40 +50,62 @@ int compare_intersections(const void *b, const void *a) {
     return a_intersection->distance > b_intersection->distance ? 1 : -1;
 }
 
-Point get_intersection_point(Render_Wall *wall, double pa, double pb) {
-    if(wall->wall->p1.x != wall->wall->p2.x){
-        double a = wall->a;
-        double b = wall->b;
-        
-        double intersection_x = (b - pb) / (pa - a);
-        if(intersection_x < wall->wall->p1.x || intersection_x > wall->wall->p2.x) {
-            return point_null;
-        }
-        
-        double intersection_y = a * intersection_x + b;
-        Point ret = {.x = intersection_x, .y = intersection_y};
-        return ret;
-    }
-
-
-    double intersection_straight_x = wall->wall->p1.x;
-    double intersection_straight_y = pa * intersection_straight_x + pb;
-    if(intersection_straight_y < wall->wall->p1.y || intersection_straight_y > wall->wall->p2.y) {
+Point get_intersection_straight(Render_Wall *wall, double pa, double pb) {
+    double intersection_x = wall->wall->p1.x;
+    double intersection_y = pa * intersection_x + pb;
+    if(intersection_y < wall->wall->p1.y || intersection_y > wall->wall->p2.y) {
         return point_null;
     }
-    Point ret_straight = {.x = intersection_straight_x, .y = intersection_straight_y};
-        return ret_straight;
+    Point ret = {.x = intersection_x, .y = intersection_y};
+    return ret;
+}
+
+Point get_intersection_90(Render_Wall *wall, double x, double y) {
+
+    if(wall->wall->p1.x > x || wall->wall->p2.x < x) {
+        Point null_ret;
+        copy_point(&point_null, &null_ret);
+        return null_ret;
+    }
+
+    double intersection_x = x;
+    double intersection_y = wall->a * intersection_x + wall->b;
+    Point ret = {.x = intersection_x, .y = intersection_y};
+    return ret;
+}
+
+
+
+Point get_intersection_point(Render_Wall *wall, double x, double y, double a, double b, Angle alpha) {
+
+    if(alpha.angle == M_PI_2 || alpha.angle == M_PI_2 * 3) {
+        return get_intersection_90(wall, x, y);
+    }
+
+    double tg_alpha = alpha.tg;
+    double pa = tg_alpha;
+    double pb = y - x * tg_alpha;
+
+    if(wall->wall->p1.x == wall->wall->p2.x){
+        return get_intersection_straight(wall, pa, pb);        
+    }
+
+    double intersection_x = (b - pb) / (pa - a);
+    if(intersection_x < wall->wall->p1.x || intersection_x > wall->wall->p2.x) {
+        return point_null;
+    }
+    
+    double intersection_y = a * intersection_x + b;
+    Point ret = {.x = intersection_x, .y = intersection_y};
+    return ret;
 } 
 
 // returns the coordinates where the ray hit the wall if it hits, point_null otherwise
 Intersection intersects(double x, double y, double z, Angle alpha, Angle beta, Render_Wall* wall){
     double a = wall->a;
     double b = wall->b;
-    double tg_alpha = alpha.tg;
-    double pa = tg_alpha;
-    double pb = y - x * tg_alpha;
     
-    Point intersection = get_intersection_point(wall, pa, pb);
+    Point intersection = get_intersection_point(wall, x, y, a, b, alpha);
 
     if(point_equals(intersection, point_null)) {
         return intersection_null;
@@ -196,7 +218,7 @@ Render_Scene *create_render_scene(Scene *scene) {
     ret->num_walls = scene->num_walls;
     ret->walls = (Render_Wall *)malloc(scene->num_walls * sizeof(Render_Wall));
     ret->max_bounce = 2;
-    ret->intersection_buffer = (Intersection *)malloc((scene->num_walls + 1) * ret->max_bounce * sizeof(Intersection));
+    ret->intersection_buffer = (Intersection *)malloc((scene->num_walls + 1) * (ret->max_bounce + 1) * sizeof(Intersection));
     ret->floor = scene->floor;
     for(int i = 0; i < scene->num_walls; i++) {
         Wall *wall = &scene->walls[i];

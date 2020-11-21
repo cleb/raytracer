@@ -5,6 +5,7 @@
 #include "color.h"
 #include "scene.h"
 #include "angle.h"
+
 #define ANGLE_90 (M_PI / 2)
 #define ANGLE_180 M_PI
 #define ANGLE_270 (M_PI * 3 / 2)

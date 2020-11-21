@@ -137,6 +137,26 @@ Intersection * get_intersection_buffer(Render_Scene *scene, int index){
     return &scene->intersection_buffer[(scene->max_bounce - index) * (scene->num_walls + 1)];
 }
 
+Intersection intersects_floor(Angle alpha, Angle beta, double player_x, double player_y, double player_z, Render_Scene * scene) {
+    Intersection ret;
+    double inverse_beta = M_PI_2 - beta.angle;
+    double floor_dist = tan(inverse_beta) * player_z * -1;
+    double ray_floor_dist = sqrt(pow(floor_dist,2) + pow(player_z,2));
+    ret.distance = ray_floor_dist;
+    Point floor_intersect = {.x = floor_dist * alpha.cos + player_x, .y = floor_dist * alpha.sin + player_y};
+    ret.point = floor_intersect;
+    ret.texture = scene->floor;
+    ret.angle = 0;
+    ret.reflexivity = 0;
+    Point_3 floor_point_in_space = {
+        .x = floor_intersect.x,
+        .y = floor_intersect.y,
+        .z = 0
+    };
+    ret.point_in_space = floor_point_in_space;
+    return ret;
+}
+
 Color trace_ray(double player_x, double player_y, double player_z, double alpha, double beta, Render_Scene *scene, int max_bounce){
     Angle alpha_angle = create_angle(alpha);
     Angle beta_angle = create_angle(beta);
@@ -148,21 +168,7 @@ Color trace_ray(double player_x, double player_y, double player_z, double alpha,
     }   
 
     if(beta_angle.sin < 0) {
-        double inverse_beta = M_PI_2 - beta_angle.angle;
-        double floor_dist = tan(inverse_beta) * player_z * -1;
-        double ray_floor_dist = sqrt(pow(floor_dist,2) + pow(player_z,2));
-        intersection_buffer[scene->num_walls].distance = ray_floor_dist;
-        Point floor_intersect = {.x = floor_dist * alpha_angle.cos + player_x, .y = floor_dist * alpha_angle.sin + player_y};
-        intersection_buffer[scene->num_walls].point = floor_intersect;
-        intersection_buffer[scene->num_walls].texture = scene->floor;
-        intersection_buffer[scene->num_walls].angle = 0;
-        intersection_buffer[scene->num_walls].reflexivity = 0;
-        Point_3 floor_point_in_space = {
-            .x = floor_intersect.x,
-            .y = floor_intersect.y,
-            .z = 0
-        };
-        intersection_buffer[scene->num_walls].point_in_space = floor_point_in_space;
+        intersection_buffer[scene->num_walls] = intersects_floor(alpha_angle, beta_angle, player_x, player_y, player_z, scene);
     } else {
         copy_intersection(&intersection_null, &intersection_buffer[scene->num_walls]);
     }

@@ -12,6 +12,8 @@ Intersection intersection_null = {.point = {.x = INFINITY, .y = INFINITY}, .dist
 Color ret_black = {.r = 0, .g = 0, .b = 0};
 
 Color trace_ray(double player_x, double player_y, double player_z, double alpha, double beta, Render_Scene *scene, int max_bounce);
+Intersection_Buffer *create_intersection_buffer(int size);
+void destroy_intersection_buffer(Intersection_Buffer *buffer);
 
 void copy_point(Point *src, Point *dest) {
     dest->x = src->x;
@@ -21,6 +23,10 @@ void copy_point(Point *src, Point *dest) {
 void copy_intersection(Intersection *src, Intersection *dest) {
     dest->distance = src->distance;
     dest->reflexivity = src->reflexivity;
+    dest->angle = src->angle;
+    dest->point_in_space = src->point_in_space;
+    dest->point = src->point;
+    dest->texture = src->texture;
     copy_point(&src->point, &dest->point);    
 }
 
@@ -135,10 +141,6 @@ Intersection intersects(double x, double y, double z, Angle alpha, Angle beta, R
     return ret;
 }
 
-Intersection * get_intersection_buffer(Render_Scene *scene, int index){
-    return &scene->intersection_buffer[(scene->max_bounce - index) * (scene->num_walls + 1)];
-}
-
 Intersection intersects_floor(Angle alpha, Angle beta, double player_x, double player_y, double player_z, Render_Scene * scene) {
     Intersection ret;
     double inverse_beta = M_PI_2 - beta.angle;
@@ -157,6 +159,27 @@ Intersection intersects_floor(Angle alpha, Angle beta, double player_x, double p
     };
     ret.point_in_space = floor_point_in_space;
     return ret;
+}
+
+void add_to_intersection_buffer(Intersection_Buffer *buffer, Intersection *intersection) {
+    copy_intersection(intersection,&buffer->buffer[buffer->top]);
+    buffer->top ++;
+}
+
+Intersection_Buffer_Iterator get_intersection_buffer_iterator(Intersection_Buffer * buffer){
+    qsort(buffer->buffer,buffer->top ,sizeof(Intersection),compare_intersections);
+    Intersection_Buffer_Iterator iterator = {.current = buffer->buffer, .items = buffer->size};
+    return iterator;
+}
+
+Intersection* intersection_buffer_iterator_get_next(Intersection_Buffer_Iterator *iterator) {
+    if(iterator->items <= 0) {
+        return NULL;
+    }
+    Intersection *ret = iterator->current;
+    iterator->current++;
+    iterator->items--;
+    return ret;    
 }
 
 void follow_ray(Color *color, Intersection *intersection, double alpha, double beta, Render_Scene * scene, int max_bounce) {
@@ -182,22 +205,23 @@ Color trace_ray(double player_x, double player_y, double player_z, double alpha,
     Angle alpha_angle = create_angle(alpha);
     Angle beta_angle = create_angle(beta);
     Color color = {.r = ret_black.r, .g = ret_black.g, .b=ret_black.b};
-    Intersection *intersection_buffer = get_intersection_buffer(scene,max_bounce);
+    Intersection_Buffer *intersection_buffer = create_intersection_buffer(scene->num_walls + 1);
     #pragma omp parallel for
     for(int i = 0; i < scene->num_walls; i++) {
-        intersection_buffer[i] = intersects(player_x, player_y, player_z, alpha_angle,beta_angle,&(scene->walls[i]));
+        Intersection intersection = intersects(player_x, player_y, player_z, alpha_angle,beta_angle,&(scene->walls[i]));
+        add_to_intersection_buffer(intersection_buffer, &intersection);
     }   
 
     if(beta_angle.sin < 0) {
-        intersection_buffer[scene->num_walls] = intersects_floor(alpha_angle, beta_angle, player_x, player_y, player_z, scene);
+        Intersection floor_intersection = intersects_floor(alpha_angle, beta_angle, player_x, player_y, player_z, scene);
+        add_to_intersection_buffer(intersection_buffer, &floor_intersection);
     } else {
-        copy_intersection(&intersection_null, &intersection_buffer[scene->num_walls]);
+        add_to_intersection_buffer(intersection_buffer, &intersection_null);
     }
 
-    qsort(intersection_buffer,scene->num_walls + 1,sizeof(Intersection),compare_intersections);
-
-    for(int i = 0; i < scene->num_walls + 1; i++) {
-        Intersection *current_intersection = &intersection_buffer[i];
+    Intersection_Buffer_Iterator iterator = get_intersection_buffer_iterator(intersection_buffer);
+    Intersection *current_intersection;
+    while((current_intersection = intersection_buffer_iterator_get_next(&iterator)) != NULL) {
         if(!intersection_equals(current_intersection, &intersection_null)) {
             Color *intersection_color = get_color(current_intersection->texture,
             current_intersection->point.x,
@@ -206,6 +230,8 @@ Color trace_ray(double player_x, double player_y, double player_z, double alpha,
             follow_ray(&color, current_intersection, alpha, beta, scene, max_bounce);
         }
     }
+
+    destroy_intersection_buffer(intersection_buffer);
     
     return color;
 }
@@ -223,7 +249,6 @@ Render_Scene *create_render_scene(Scene *scene) {
     ret->num_walls = scene->num_walls;
     ret->walls = (Render_Wall *)malloc(scene->num_walls * sizeof(Render_Wall));
     ret->max_bounce = 2;
-    ret->intersection_buffer = (Intersection *)malloc((scene->num_walls + 1) * (ret->max_bounce + 1) * sizeof(Intersection));
     ret->floor = scene->floor;
     for(int i = 0; i < scene->num_walls; i++) {
         Wall *wall = &scene->walls[i];
@@ -250,6 +275,18 @@ void destroy_render_scene(Render_Scene *scene) {
     free(scene);
 }
 
+Intersection_Buffer *create_intersection_buffer(int size){
+    Intersection_Buffer *ret = (Intersection_Buffer *)malloc(sizeof(Intersection_Buffer));
+    ret->buffer = (Intersection *)malloc(size * sizeof(Intersection));    
+    ret->size = size;
+    ret->top = 0;
+}
+
+void destroy_intersection_buffer(Intersection_Buffer *buffer){
+    free(buffer->buffer);
+    free(buffer);
+}
+
 Render_Canvas *create_render_canvas(int screen_w, int screen_h) {
     Render_Canvas *ret = (Render_Canvas *)malloc(sizeof(Render_Canvas));
     ret->screen_w = screen_w;
@@ -257,7 +294,6 @@ Render_Canvas *create_render_canvas(int screen_w, int screen_h) {
     ret->plane_dist = (screen_w / 2.0f);
     ret->alpha = (double *)malloc(ret->screen_w * sizeof(double));
     ret->beta = (double *)malloc(ret->screen_h * ret->screen_w * sizeof(double));
-
     
     int screen_w_half = screen_w / 2;
     int screen_h_half = screen_h / 2;
@@ -277,6 +313,7 @@ Render_Canvas *create_render_canvas(int screen_w, int screen_h) {
 void destroy_render_canvas(Render_Canvas *canvas) {
     free(canvas->alpha);
     free(canvas->beta);
+    destroy_intersection_buffer(canvas->intersection_buffer);
     free(canvas);
 }
 

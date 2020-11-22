@@ -63,6 +63,49 @@ START_TEST(test_create_angle_90)
 }
 END_TEST
 
+START_TEST(test_create_intersection_buffer)
+{
+    Intersection_Buffer *buffer = create_intersection_buffer(10);
+    ck_assert_int_eq(10, buffer->size);
+    destroy_intersection_buffer(buffer);
+}
+END_TEST
+
+START_TEST(test_add_to_intersection_buffer)
+{
+    Intersection_Buffer *buffer = create_intersection_buffer(10);
+    Intersection intersection = {.angle = 1, .distance = 1};
+    add_to_intersection_buffer(buffer,&intersection);
+
+    ck_assert_int_eq(1, buffer->top);
+    ck_assert_double_eq(1, buffer->buffer[0].angle);
+    ck_assert_double_eq(1, buffer->buffer[0].distance);
+    destroy_intersection_buffer(buffer);
+}
+
+START_TEST(test_iterate_intersection_buffer)
+{
+    Intersection_Buffer *buffer = create_intersection_buffer(2);
+    Intersection intersection = {.angle = 1, .distance = 1};
+    Intersection intersection2 = {.angle = 2, .distance = 2};
+    add_to_intersection_buffer(buffer,&intersection);
+    add_to_intersection_buffer(buffer,&intersection2);
+
+    Intersection_Buffer_Iterator iterator = get_intersection_buffer_iterator(buffer);
+
+    Intersection *first = intersection_buffer_iterator_get_next(&iterator);
+    Intersection *second = intersection_buffer_iterator_get_next(&iterator);
+    Intersection *third = intersection_buffer_iterator_get_next(&iterator);
+
+    
+    ck_assert_double_eq(2, first->angle);
+    ck_assert_double_eq(2, first->distance);
+    ck_assert_double_eq(1, second->angle);
+    ck_assert_double_eq(1, second->distance);
+    ck_assert(third == NULL);
+    destroy_intersection_buffer(buffer);
+}
+
 
 Suite * raytracer_suite(void)
 {
@@ -79,6 +122,10 @@ Suite * raytracer_suite(void)
     tcase_add_test(tc_core, test_intersects_angle);
     tcase_add_test(tc_core, test_create_angle_0);
     tcase_add_test(tc_core, test_create_angle_90);
+
+    tcase_add_test(tc_core, test_create_intersection_buffer);
+    tcase_add_test(tc_core, test_add_to_intersection_buffer);
+    tcase_add_test(tc_core, test_iterate_intersection_buffer);
     suite_add_tcase(s, tc_core);
 
     return s;

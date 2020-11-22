@@ -50,7 +50,6 @@ typedef struct {
     double plane_dist;
     double *alpha;
     double *beta;
-    Intersection_Buffer *intersection_buffer;
 } Render_Canvas;
 
 Color render_pixel(double player_x, double player_y, double player_z, double player_alpha, int pixel_x, int pixel_y, Render_Canvas *canvas, Render_Scene *scene);

@@ -166,6 +166,14 @@ void add_to_intersection_buffer(Intersection_Buffer *buffer, Intersection *inter
     buffer->top ++;
 }
 
+void insert_to_intersection_buffer(Intersection_Buffer *buffer, Intersection *intersection, int index) {
+    copy_intersection(intersection,&buffer->buffer[index]);    
+}
+
+void adjust_intersection_buffer_top(Intersection_Buffer *buffer, int top) {
+    buffer->top = top;
+}
+
 Intersection_Buffer_Iterator get_intersection_buffer_iterator(Intersection_Buffer * buffer){
     qsort(buffer->buffer,buffer->top ,sizeof(Intersection),compare_intersections);
     Intersection_Buffer_Iterator iterator = {.current = buffer->buffer, .items = buffer->size};
@@ -206,11 +214,12 @@ Color trace_ray(double player_x, double player_y, double player_z, double alpha,
     Angle beta_angle = create_angle(beta);
     Color color = {.r = ret_black.r, .g = ret_black.g, .b=ret_black.b};
     Intersection_Buffer *intersection_buffer = create_intersection_buffer(scene->num_walls + 1);
-    #pragma omp parallel for
+    
     for(int i = 0; i < scene->num_walls; i++) {
         Intersection intersection = intersects(player_x, player_y, player_z, alpha_angle,beta_angle,&(scene->walls[i]));
-        add_to_intersection_buffer(intersection_buffer, &intersection);
+        insert_to_intersection_buffer(intersection_buffer, &intersection, i);
     }   
+    adjust_intersection_buffer_top(intersection_buffer, scene->num_walls);
 
     if(beta_angle.sin < 0) {
         Intersection floor_intersection = intersects_floor(alpha_angle, beta_angle, player_x, player_y, player_z, scene);
@@ -313,7 +322,6 @@ Render_Canvas *create_render_canvas(int screen_w, int screen_h) {
 void destroy_render_canvas(Render_Canvas *canvas) {
     free(canvas->alpha);
     free(canvas->beta);
-    destroy_intersection_buffer(canvas->intersection_buffer);
     free(canvas);
 }
 

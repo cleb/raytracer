@@ -7,6 +7,7 @@
 
 void render(SDL_Renderer *renderer, double x, double y, double alpha, Render_Canvas *canvas, Render_Scene *scene) {
     Color colors[320][240];
+    #pragma omp parallel for
     for(int s_y = 0; s_y < 240; s_y++) {
         for(int s_x = 0; s_x < 320; s_x++) {
             colors[s_x][s_y] = render_pixel(x,y,100.0f,alpha,s_x,s_y, canvas,scene);            
@@ -94,7 +95,7 @@ int main(int argc, char *argv[]) {
         }
 
         int now_ticks = SDL_GetTicks();
-        if(now_ticks - ticks > 200) {
+        if(now_ticks - ticks > 60) {
             render(renderer,x,y,alpha,canvas,render_scene);
             ticks = now_ticks;
         }

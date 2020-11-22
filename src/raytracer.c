@@ -214,7 +214,7 @@ Color trace_ray(double player_x, double player_y, double player_z, double alpha,
     Angle beta_angle = create_angle(beta);
     Color color = {.r = ret_black.r, .g = ret_black.g, .b=ret_black.b};
     Intersection_Buffer *intersection_buffer = create_intersection_buffer(scene->num_walls + 1);
-    //#pragma omp parallel for
+    
     for(int i = 0; i < scene->num_walls; i++) {
         Intersection intersection = intersects(player_x, player_y, player_z, alpha_angle,beta_angle,&(scene->walls[i]));
         insert_to_intersection_buffer(intersection_buffer, &intersection, i);

@@ -1,11 +1,11 @@
 debug: main.c raytracer.o texture_loader.o texture.o angle.o
-	gcc main.c raytracer.o texture_loader.o texture.o angle.o -o rt -lSDL2 -lSDL2_image -lm -g 
+	gcc main.c raytracer.o texture_loader.o texture.o angle.o -o rt -lSDL2 -lSDL2_image -lm -g -fopenmp
 
-rt: main.c raytracer.o
-	gcc main.c raytracer.o -o rt -lSDL2 -lm 
+release: main.c raytracer.o texture_loader.o texture.o angle.o
+	gcc main.c raytracer.o texture_loader.o texture.o angle.o -o release -lSDL2 -lSDL2_image -lm -O3 -fopenmp
 
 raytracer.o: src/raytracer.c
-	gcc src/raytracer.c -c -o raytracer.o -lm -g 
+	gcc src/raytracer.c -c -o raytracer.o -lm -g -fopenmp
 
 texture_loader.o: src/texture_loader.c
 	gcc src/texture_loader.c -c -o texture_loader.o -g

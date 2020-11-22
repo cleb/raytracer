@@ -8,14 +8,12 @@
 void render(SDL_Renderer *renderer, double x, double y, double alpha, Render_Canvas *canvas, Render_Scene *scene) {
     Color colors[320][240];
     for(int s_y = 0; s_y < 240; s_y++) {
-        #pragma omp parallel for
         for(int s_x = 0; s_x < 320; s_x++) {
             colors[s_x][s_y] = render_pixel(x,y,100.0f,alpha,s_x,s_y, canvas,scene);            
         }
     }
 
     for(int s_y = 0; s_y < 240; s_y++) {
-            #pragma omp parallel for
             for(int s_x = 0; s_x < 320; s_x++) {
                 SDL_SetRenderDrawColor(renderer, colors[s_x][s_y].r, colors[s_x][s_y].g, colors[s_x][s_y].b, 255);
                 SDL_RenderDrawPoint(renderer, s_x, s_y);
@@ -64,6 +62,8 @@ int main(int argc, char *argv[]) {
     double x = 0;
     double y = 600;
     double alpha = ANGLE_270;
+
+    int ticks = 0;
     
     
     while (active) {
@@ -93,7 +93,11 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        render(renderer,x,y,alpha,canvas,render_scene);
+        int now_ticks = SDL_GetTicks();
+        if(now_ticks - ticks > 200) {
+            render(renderer,x,y,alpha,canvas,render_scene);
+            ticks = now_ticks;
+        }
     }
     destroy_render_canvas(canvas);
     destroy_render_scene(render_scene);

@@ -5,6 +5,7 @@
 #include "color.h"
 #include "scene.h"
 #include "angle.h"
+#include "render_canvas.h"
 
 #define ANGLE_90 (M_PI / 2)
 #define ANGLE_180 M_PI
@@ -43,14 +44,6 @@ typedef struct {
     Intersection *current;
     int items;
 } Intersection_Buffer_Iterator;
-
-typedef struct {
-    int screen_w;
-    int screen_h;
-    double plane_dist;
-    double *alpha;
-    double *beta;
-} Render_Canvas;
 
 Color render_pixel(double player_x, double player_y, double player_z, double player_alpha, int pixel_x, int pixel_y, Render_Canvas *canvas, Render_Scene *scene);
 Render_Scene *create_render_scene(Scene *scene);

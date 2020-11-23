@@ -141,10 +141,11 @@ Intersection intersects(double x, double y, double z, Angle alpha, Angle beta, R
     return ret;
 }
 
-Intersection intersects_floor(Angle alpha, Angle beta, double player_x, double player_y, double player_z, Render_Scene * scene) {
+Intersection intersects_floor(Angle alpha, Angle beta, double player_x, double player_y, double player_z, Render_Canvas *canvas, Render_Scene * scene) {
     Intersection ret;
     double inverse_beta = M_PI_2 - beta.angle;
-    double floor_dist = tan(inverse_beta) * player_z * -1;
+    Angle inverse_beta_angle = get_precomputed_angle(canvas, inverse_beta);
+    double floor_dist = inverse_beta_angle.tg * player_z * -1;
     double ray_floor_dist = sqrt(pow(floor_dist,2) + pow(player_z,2));
     ret.distance = ray_floor_dist;
     Point floor_intersect = {.x = floor_dist * alpha.cos + player_x, .y = floor_dist * alpha.sin + player_y};
@@ -194,10 +195,11 @@ void follow_ray(Color *color, Intersection *intersection, double alpha, double b
     if(intersection->reflexivity > 0 && max_bounce > 0) {
         double new_alpha = 2 * intersection->angle - alpha;
         double new_beta = beta;
+        Angle new_alpha_angle = get_precomputed_angle(canvas, new_alpha);
 
         Color reflection_color = trace_ray(
-            intersection->point_in_space.x + cos(new_alpha), 
-            intersection->point_in_space.y + sin(new_alpha), 
+            intersection->point_in_space.x + new_alpha_angle.cos, 
+            intersection->point_in_space.y + new_alpha_angle.sin, 
             intersection->point_in_space.z, 
             new_alpha,
             new_beta, 
@@ -223,7 +225,7 @@ Color trace_ray(double player_x, double player_y, double player_z, double alpha,
     adjust_intersection_buffer_top(intersection_buffer, scene->num_walls);
 
     if(beta_angle.sin < 0) {
-        Intersection floor_intersection = intersects_floor(alpha_angle, beta_angle, player_x, player_y, player_z, scene);
+        Intersection floor_intersection = intersects_floor(alpha_angle, beta_angle, player_x, player_y, player_z, canvas, scene);
         add_to_intersection_buffer(intersection_buffer, &floor_intersection);
     } else {
         add_to_intersection_buffer(intersection_buffer, &intersection_null);

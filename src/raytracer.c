@@ -11,7 +11,7 @@ Point point_null = {.x = INFINITY, .y = INFINITY};
 Intersection intersection_null = {.point = {.x = INFINITY, .y = INFINITY}, .distance = INFINITY, .reflexivity = INFINITY};
 Color ret_black = {.r = 0, .g = 0, .b = 0};
 
-Color trace_ray(double player_x, double player_y, double player_z, double alpha, double beta, Render_Scene *scene, int max_bounce);
+Color trace_ray(double player_x, double player_y, double player_z, double alpha, double beta, Render_Canvas * canvas, Render_Scene *scene, int max_bounce);
 Intersection_Buffer *create_intersection_buffer(int size);
 void destroy_intersection_buffer(Intersection_Buffer *buffer);
 
@@ -190,7 +190,7 @@ Intersection* intersection_buffer_iterator_get_next(Intersection_Buffer_Iterator
     return ret;    
 }
 
-void follow_ray(Color *color, Intersection *intersection, double alpha, double beta, Render_Scene * scene, int max_bounce) {
+void follow_ray(Color *color, Intersection *intersection, double alpha, double beta, Render_Canvas * canvas, Render_Scene * scene, int max_bounce) {
     if(intersection->reflexivity > 0 && max_bounce > 0) {
         double new_alpha = 2 * intersection->angle - alpha;
         double new_beta = beta;
@@ -201,6 +201,7 @@ void follow_ray(Color *color, Intersection *intersection, double alpha, double b
             intersection->point_in_space.z, 
             new_alpha,
             new_beta, 
+            canvas,
             scene,
             max_bounce - 1
         );
@@ -209,9 +210,9 @@ void follow_ray(Color *color, Intersection *intersection, double alpha, double b
     }
 }
 
-Color trace_ray(double player_x, double player_y, double player_z, double alpha, double beta, Render_Scene *scene, int max_bounce){
-    Angle alpha_angle = create_angle(alpha);
-    Angle beta_angle = create_angle(beta);
+Color trace_ray(double player_x, double player_y, double player_z, double alpha, double beta, Render_Canvas *canvas, Render_Scene *scene, int max_bounce){
+    Angle alpha_angle = get_precomputed_angle(canvas, alpha);
+    Angle beta_angle = get_precomputed_angle(canvas, beta);
     Color color = {.r = ret_black.r, .g = ret_black.g, .b=ret_black.b};
     Intersection_Buffer *intersection_buffer = create_intersection_buffer(scene->num_walls + 1);
     
@@ -236,7 +237,7 @@ Color trace_ray(double player_x, double player_y, double player_z, double alpha,
             current_intersection->point.x,
             current_intersection->point.y);
             add_color(&color,intersection_color);            
-            follow_ray(&color, current_intersection, alpha, beta, scene, max_bounce);
+            follow_ray(&color, current_intersection, alpha, beta, canvas, scene, max_bounce);
         }
     }
 
@@ -250,7 +251,7 @@ Color render_pixel(double player_x, double player_y, double player_z, double pla
     double alpha = canvas->alpha[pixel_x] + player_alpha;
     double beta = canvas->beta[pixel_z * canvas->screen_w + pixel_x];
 
-    return trace_ray(player_x, player_y, player_z, alpha, beta, scene, scene->max_bounce);
+    return trace_ray(player_x, player_y, player_z, alpha, beta, canvas, scene, scene->max_bounce);
 }
 
 Render_Scene *create_render_scene(Scene *scene) {

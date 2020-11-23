@@ -1,7 +1,17 @@
 #include <stdlib.h>
 #include <math.h>
 #include "render_canvas.h"
+#define PRECOMPUTED_ANGLE_MULTIPLIER 10000
+#define NUM_PRECOMPUTED_ANGLES (int)(M_PI*2*PRECOMPUTED_ANGLE_MULTIPLIER)
 
+Angle *precompute_angles(){
+    Angle *ret = (Angle*)malloc(NUM_PRECOMPUTED_ANGLES*sizeof(Angle));
+    for(int i = 0; i < NUM_PRECOMPUTED_ANGLES; i++) {
+        double angle = (double)i / PRECOMPUTED_ANGLE_MULTIPLIER;
+        ret[i] = create_angle(angle);
+    }
+    return ret;
+}
 
 Render_Canvas *create_render_canvas(int screen_w, int screen_h) {
     Render_Canvas *ret = (Render_Canvas *)malloc(sizeof(Render_Canvas));
@@ -23,11 +33,23 @@ Render_Canvas *create_render_canvas(int screen_w, int screen_h) {
         }
 
     }
+
+    ret->precomputed_angles = precompute_angles();
     return ret;
+}
+
+Angle get_precomputed_angle(Render_Canvas *canvas, double angle) {
+    int multiplied = angle * PRECOMPUTED_ANGLE_MULTIPLIER;
+    int normalized = multiplied % NUM_PRECOMPUTED_ANGLES;
+    if(normalized < 0) {
+        normalized += NUM_PRECOMPUTED_ANGLES;
+    }
+    return canvas->precomputed_angles[normalized];
 }
 
 void destroy_render_canvas(Render_Canvas *canvas) {
     free(canvas->alpha);
     free(canvas->beta);
+    free(canvas->precomputed_angles);
     free(canvas);
 }

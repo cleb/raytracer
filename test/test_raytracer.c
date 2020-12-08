@@ -2,18 +2,21 @@
 #include <math.h>
 #include "../src/raytracer.h"
 #include "../src/angle.h"
+#include "../src/wall.h"
 #include "./raytracer_private_api.h"
 
 START_TEST(test_intersects_direct)
 {
     Point p1 = {.x = -100, .y = 10};
     Point p2 = {.x = 100, .y = 10};
-    Wall wall_data = {.p1 = p1, .p2 = p2, .bottom = -100, .top = 100};
-    Render_Wall wall = {.a = 0, .b = 10, .wall = &wall_data};
-    Angle alpha = {.angle = M_PI_2, .cos = 0, .sin = 1, .tg= INFINITY};
-    Angle beta = {.angle = 0, .cos = 1, .sin = 0, .tg= 0};
-    Intersection intersection = intersects(0,0,0,alpha,beta, &wall);
-    ck_assert_double_eq(10,intersection.distance);
+    Line l1 = {.start = p1, .end = p2};
+    Wall wall_data = {.line = l1, .bottom = -100, .top = 100};
+    Render_Line render_line = {.a = 0, .b = 10};
+    Render_Wall wall = {.line = render_line, .wall = &wall_data};
+    Angle alpha = {.angle = M_PI_2, .cos = 0, .sin = 1, .tg = INFINITY};
+    Angle beta = {.angle = 0, .cos = 1, .sin = 0, .tg = 0};
+    Intersection intersection = intersects(0, 0, 0, alpha, beta, &wall);
+    ck_assert_double_eq(10, intersection.distance);
 }
 END_TEST
 
@@ -21,12 +24,14 @@ START_TEST(test_intersects_angle)
 {
     Point p1 = {.x = -10, .y = -15};
     Point p2 = {.x = 10, .y = 5};
-    Wall wall_data = {.p1 = p1, .p2 = p2, .bottom = -100, .top = 100};
-    Render_Wall wall = {.a = 1, .b = -5, .wall = &wall_data};
-    Angle alpha = {.angle = 0, .cos = 1, .sin = 0, .tg= 0};
-    Angle beta = {.angle = 0, .cos = 1, .sin = 0, .tg= 0};
-    Intersection intersection = intersects(0,0,0,alpha,beta, &wall);
-    ck_assert_double_eq(5,intersection.distance);
+    Line l1 = {.start = p1, .end = p2};
+    Wall wall_data = {.line = l1, .bottom = -100, .top = 100};
+    Render_Line render_line = {.a = 1, .b = -5};
+    Render_Wall wall = {.line = render_line, .wall = &wall_data};
+    Angle alpha = {.angle = 0, .cos = 1, .sin = 0, .tg = 0};
+    Angle beta = {.angle = 0, .cos = 1, .sin = 0, .tg = 0};
+    Intersection intersection = intersects(0, 0, 0, alpha, beta, &wall);
+    ck_assert_double_eq(5, intersection.distance);
 }
 END_TEST
 
@@ -34,11 +39,13 @@ START_TEST(test_intersects_miss)
 {
     Point p1 = {.x = -100, .y = 10};
     Point p2 = {.x = 100, .y = 10};
-    Wall wall_data = {.p1 = p1, .p2 = p2, .bottom = -100, .top = 100};
-    Render_Wall wall = {.a = 0, .b = 50, .wall = &wall_data};
-    Angle alpha = {.angle = 0, .cos = 1, .sin = 0, .tg= 0}; 
-    Angle beta = {.angle = 0, .cos = 1, .sin = 0, .tg= 0};
-    Intersection intersection = intersects(0,0,0,alpha,beta, &wall);
+    Line l1 = {.start = p1, .end = p2};
+    Wall wall_data = {.line = l1, .bottom = -100, .top = 100};
+    Render_Line render_line = {.a = 0, .b = 50};
+    Render_Wall wall = {.line = render_line, .wall = &wall_data};
+    Angle alpha = {.angle = 0, .cos = 1, .sin = 0, .tg = 0};
+    Angle beta = {.angle = 0, .cos = 1, .sin = 0, .tg = 0};
+    Intersection intersection = intersects(0, 0, 0, alpha, beta, &wall);
     ck_assert_double_eq(INFINITY, intersection.distance);
 }
 END_TEST
@@ -75,7 +82,7 @@ START_TEST(test_add_to_intersection_buffer)
 {
     Intersection_Buffer *buffer = create_intersection_buffer(10);
     Intersection intersection = {.angle = 1, .distance = 1};
-    add_to_intersection_buffer(buffer,&intersection);
+    add_to_intersection_buffer(buffer, &intersection);
 
     ck_assert_int_eq(1, buffer->top);
     ck_assert_double_eq(1, buffer->buffer[0].angle);
@@ -88,8 +95,8 @@ START_TEST(test_iterate_intersection_buffer)
     Intersection_Buffer *buffer = create_intersection_buffer(2);
     Intersection intersection = {.angle = 1, .distance = 1};
     Intersection intersection2 = {.angle = 2, .distance = 2};
-    add_to_intersection_buffer(buffer,&intersection);
-    add_to_intersection_buffer(buffer,&intersection2);
+    add_to_intersection_buffer(buffer, &intersection);
+    add_to_intersection_buffer(buffer, &intersection2);
 
     Intersection_Buffer_Iterator iterator = get_intersection_buffer_iterator(buffer);
 
@@ -97,7 +104,6 @@ START_TEST(test_iterate_intersection_buffer)
     Intersection *second = intersection_buffer_iterator_get_next(&iterator);
     Intersection *third = intersection_buffer_iterator_get_next(&iterator);
 
-    
     ck_assert_double_eq(2, first->angle);
     ck_assert_double_eq(2, first->distance);
     ck_assert_double_eq(1, second->angle);
@@ -106,8 +112,7 @@ START_TEST(test_iterate_intersection_buffer)
     destroy_intersection_buffer(buffer);
 }
 
-
-Suite * raytracer_suite(void)
+Suite *raytracer_suite(void)
 {
     Suite *s;
     TCase *tc_core;
@@ -133,15 +138,15 @@ Suite * raytracer_suite(void)
 
 int main(void)
 {
-   int number_failed;
-   Suite *s;
-   SRunner *sr;
+    int number_failed;
+    Suite *s;
+    SRunner *sr;
 
-   s = raytracer_suite();
-   sr = srunner_create(s);
+    s = raytracer_suite();
+    sr = srunner_create(s);
 
-   srunner_run_all(sr, CK_NORMAL);
-   number_failed = srunner_ntests_failed(sr);
-   srunner_free(sr);
-   return (number_failed == 0) ? 0 : 1;
+    srunner_run_all(sr, CK_NORMAL);
+    number_failed = srunner_ntests_failed(sr);
+    srunner_free(sr);
+    return (number_failed == 0) ? 0 : 1;
 }

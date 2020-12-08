@@ -1,9 +1,9 @@
 #pragma once
-#include "point.h"
+#include "line.h"
 #include "texture.h"
-typedef struct {
-    Point p1;
-    Point p2;    
+typedef struct
+{
+    Line line;
     double top;
     double bottom;
     double reflexivity;

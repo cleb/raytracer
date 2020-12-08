@@ -11,14 +11,21 @@
 #define ANGLE_180 M_PI
 #define ANGLE_270 (M_PI * 3 / 2)
 
-typedef struct {
-    Wall *wall;
+typedef struct
+{
     double a;
     double b;
     double angle;
+} Render_Line;
+
+typedef struct
+{
+    Wall *wall;
+    Render_Line line;
 } Render_Wall;
 
-typedef struct {
+typedef struct
+{
     double distance;
     Point point;
     Point_3 point_in_space;
@@ -27,20 +34,23 @@ typedef struct {
     double angle;
 } Intersection;
 
-typedef struct {
+typedef struct
+{
     Render_Wall *walls;
-    int num_walls;   
-    Texture *floor;     
+    int num_walls;
+    Texture *floor;
     int max_bounce;
 } Render_Scene;
 
-typedef struct {
+typedef struct
+{
     Intersection *buffer;
     int size;
     int top;
 } Intersection_Buffer;
 
-typedef struct {
+typedef struct
+{
     Intersection *current;
     int items;
 } Intersection_Buffer_Iterator;
@@ -54,5 +64,5 @@ void destroy_render_canvas(Render_Canvas *canvas);
 Intersection_Buffer *create_intersection_buffer(int size);
 void destroy_intersection_buffer(Intersection_Buffer *buffer);
 void add_to_intersection_buffer(Intersection_Buffer *buffer, Intersection *intersection);
-Intersection_Buffer_Iterator get_intersection_buffer_iterator(Intersection_Buffer * buffer);
-Intersection* intersection_buffer_iterator_get_next(Intersection_Buffer_Iterator *iterator);
+Intersection_Buffer_Iterator get_intersection_buffer_iterator(Intersection_Buffer *buffer);
+Intersection *intersection_buffer_iterator_get_next(Intersection_Buffer_Iterator *iterator);

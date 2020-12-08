@@ -285,25 +285,6 @@ Color render_pixel(double player_x, double player_y, double player_z, double pla
     return trace_ray(player_x, player_y, player_z, alpha, beta, canvas, scene, scene->max_bounce);
 }
 
-Render_Line create_render_line(Line line)
-{
-    Render_Line ret;
-    if (line.start.x != line.end.x)
-    {
-        double a = (line.end.y - line.start.y) / (line.end.x - line.start.x);
-        double b = line.start.y - a * line.start.x;
-        ret.a = a;
-        ret.b = b;
-        ret.angle = atan(a);
-    }
-    else
-    {
-        ret.a = INFINITY;
-        ret.b = INFINITY;
-        ret.angle = ANGLE_90;
-    }
-}
-
 Render_Scene *create_render_scene(Scene *scene)
 {
     Render_Scene *ret = (Render_Scene *)malloc(sizeof(Render_Scene));

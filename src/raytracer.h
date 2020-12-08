@@ -6,17 +6,7 @@
 #include "scene.h"
 #include "angle.h"
 #include "render_canvas.h"
-
-#define ANGLE_90 (M_PI / 2)
-#define ANGLE_180 M_PI
-#define ANGLE_270 (M_PI * 3 / 2)
-
-typedef struct
-{
-    double a;
-    double b;
-    double angle;
-} Render_Line;
+#include "render_line.h"
 
 typedef struct
 {

@@ -16,5 +16,5 @@ texture.o: src/texture.c
 render_canvas.o: src/render_canvas.c
 	gcc src/render_canvas.c -c -o render_canvas.o -g
 
-runtest: test/test_raytracer.c raytracer.o texture.o angle.o
-	gcc test/test_raytracer.c raytracer.o texture.o angle.o -o runtest -lcheck -lpthread -lm -lrt -lsubunit
+runtest: test/test_raytracer.c raytracer.o texture.o angle.o render_canvas.o
+	gcc test/test_raytracer.c raytracer.o texture.o angle.o render_canvas.o -o runtest -lcheck -lpthread -lm -lrt -lsubunit

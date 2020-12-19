@@ -6,6 +6,7 @@
 #include "scene.h"
 #include "raytracer.h"
 #include "texture.h"
+#include "render_polygon_2d.h"
 
 Point point_null = {.x = INFINITY, .y = INFINITY};
 Intersection intersection_null = {.point = {.x = INFINITY, .y = INFINITY}, .distance = INFINITY, .reflexivity = INFINITY};
@@ -153,6 +154,36 @@ Intersection intersects(double x, double y, double z, Angle alpha, Angle beta, R
         .point_in_space = {.x = intersection_x, .y = intersection_y, .z = wall_y},
         .angle = wall->line.angle};
     return ret;
+}
+
+int Intersects_polygon_2d(Render_Polygon_2D *polygon, Point point)
+{
+    int has_above = 0;
+    int has_below = 0;
+    for (int i = 0; i < polygon->numlines; i++)
+    {
+        Render_Line current_line = polygon->lines[i];
+        if (current_line.line->start.x == current_line.line->end.x)
+        {
+            continue;
+        }
+        if (current_line.line->start.x < point.x && current_line.line->end.x > point.x)
+        {
+            if (point.y < current_line.a * point.x + current_line.b)
+            {
+                has_below = 1;
+            }
+            else
+            {
+                has_above = 1;
+            }
+            if (has_above && has_below)
+            {
+                return 1;
+            }
+        }
+    }
+    return 0;
 }
 
 Intersection intersects_floor(Angle alpha, Angle beta, double player_x, double player_y, double player_z, Render_Canvas *canvas, Render_Scene *scene)

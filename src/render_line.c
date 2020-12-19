@@ -5,6 +5,7 @@
 Render_Line create_render_line(Line line)
 {
     Render_Line ret;
+    ret.line = &line;
     if (line.start.x != line.end.x)
     {
         double a = (line.end.y - line.start.y) / (line.end.x - line.start.x);

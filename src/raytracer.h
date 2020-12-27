@@ -7,6 +7,7 @@
 #include "angle.h"
 #include "render_canvas.h"
 #include "render_line.h"
+#include "render_floor.h"
 
 typedef struct
 {
@@ -30,6 +31,8 @@ typedef struct
     int num_walls;
     Texture *floor;
     int max_bounce;
+    int num_floors;
+    Render_Floor *floors;
 } Render_Scene;
 
 typedef struct

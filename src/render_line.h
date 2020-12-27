@@ -9,4 +9,4 @@ typedef struct
     Line *line;
 } Render_Line;
 
-Render_Line create_render_line(Line line);
+Render_Line create_render_line(Line *line);

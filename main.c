@@ -1,6 +1,7 @@
 #include <SDL2/SDL.h>
 
 #include "src/raytracer.h"
+#include "src/polygon_2d.h"
 #include "src/texture_loader.h"
 
 void render(SDL_Renderer *renderer, double x, double y, double alpha, Render_Canvas *canvas, Render_Scene *scene)
@@ -39,7 +40,8 @@ int main(int argc, char *argv[])
     SDL_SetWindowTitle(window, "raytracer");
 
     Texture *wall = load_texture("./wall.jpg");
-    Texture *floor = load_texture("./floor.jpg");
+    Texture *texture_floor = load_texture("./floor.jpg");
+    Texture *grass = load_texture("./grass.jpg");
     Texture *glass = load_texture("./glass.png");
 
     Point p1 = {.x = -400, .y = 400};
@@ -63,7 +65,14 @@ int main(int argc, char *argv[])
     Wall w3 = {.line = l3, .bottom = 0, .top = 200, .texture = glass, .reflexivity = 0.5};
     Wall w4 = {.line = l4, .bottom = 0, .top = 200, .texture = wall, .reflexivity = 0};
     Wall scene_walls[4] = {w1, w2, w3, w4};
-    Scene scene = {.walls = scene_walls, .num_walls = 4, .floor = floor};
+
+    Line floor_lines[4] = {l1, l2, l3, l4};
+    Polygon_2D polygon = {.lines = floor_lines, .numLines = 4};
+    Floor floor = {.polygon = &polygon, .texture = texture_floor};
+    Floor scene_floors[1] = {floor};
+
+    Scene scene = {.walls = scene_walls, .num_walls = 4, .floor = grass, .floors = scene_floors, .num_floors = 1};
+
     Render_Scene *render_scene = create_render_scene(&scene);
     Render_Canvas *canvas = create_render_canvas(320, 240);
 
@@ -115,7 +124,8 @@ int main(int argc, char *argv[])
     destroy_render_scene(render_scene);
     destroy_texture(wall);
     destroy_texture(glass);
-    destroy_texture(floor);
+    destroy_texture(texture_floor);
+    destroy_texture(grass);
     SDL_Quit();
     return 0;
 }

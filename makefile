@@ -1,3 +1,4 @@
+CC=gcc
 debug: main.c raytracer.o texture_loader.o texture.o angle.o render_canvas.o
 	gcc main.c raytracer.o texture_loader.o texture.o angle.o render_canvas.o -o rt -lSDL2 -lSDL2_image -lm -g -fopenmp
 

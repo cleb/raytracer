@@ -7,6 +7,7 @@
 #include "raytracer.h"
 #include "texture.h"
 #include "render_polygon_2d.h"
+#include "render_floor.h"
 
 Point point_null = {.x = INFINITY, .y = INFINITY};
 Intersection intersection_null = {.point = {.x = INFINITY, .y = INFINITY}, .distance = INFINITY, .reflexivity = INFINITY};
@@ -156,7 +157,7 @@ Intersection intersects(double x, double y, double z, Angle alpha, Angle beta, R
     return ret;
 }
 
-int Intersects_polygon_2d(Render_Polygon_2D *polygon, Point point)
+int intersects_polygon_2d(Render_Polygon_2D *polygon, Point point)
 {
     int has_above = 0;
     int has_below = 0;
@@ -196,7 +197,16 @@ Intersection intersects_floor(Angle alpha, Angle beta, double player_x, double p
     ret.distance = ray_floor_dist;
     Point floor_intersect = {.x = floor_dist * alpha.cos + player_x, .y = floor_dist * alpha.sin + player_y};
     ret.point = floor_intersect;
+
     ret.texture = scene->floor;
+    for (int i = 0; i < scene->num_floors; i++)
+    {
+        if (intersects_polygon_2d(scene->floors[i].polygon, floor_intersect))
+        {
+            ret.texture = scene->floors[i].texture;
+        }
+    }
+
     ret.angle = 0;
     ret.reflexivity = 0;
     Point_3 floor_point_in_space = {
@@ -321,19 +331,38 @@ Render_Scene *create_render_scene(Scene *scene)
     Render_Scene *ret = (Render_Scene *)malloc(sizeof(Render_Scene));
     ret->num_walls = scene->num_walls;
     ret->walls = (Render_Wall *)malloc(scene->num_walls * sizeof(Render_Wall));
-    ret->max_bounce = 2;
-    ret->floor = scene->floor;
+
     for (int i = 0; i < scene->num_walls; i++)
     {
         Wall *wall = &scene->walls[i];
         ret->walls[i].wall = &scene->walls[i];
-        ret->walls[i].line = create_render_line(scene->walls[i].line);
+        ret->walls[i].line = create_render_line(&scene->walls[i].line);
     }
+
+    //floors
+    ret->num_floors = scene->num_floors;
+    ret->floors = (Render_Floor *)malloc(scene->num_floors * sizeof(Render_Floor));
+    for (int i = 0; i < scene->num_floors; i++)
+    {
+        Floor *floor = &scene->floors[i];
+        ret->floors[i].floor = &scene->floors[i];
+        ret->floors[i].polygon = create_render_polygon_2d(scene->floors[i].polygon);
+        ret->floors[i].texture = scene->floors[i].texture;
+    }
+
+    //global settings
+    ret->max_bounce = 2;
+    ret->floor = scene->floor;
 
     return ret;
 }
 void destroy_render_scene(Render_Scene *scene)
 {
+    for (int i = 0; i < scene->num_floors; i++)
+    {
+        destroy_render_polygon_2d(scene->floors[i].polygon);
+    }
+    free(scene->floors);
     free(scene->walls);
     free(scene);
 }

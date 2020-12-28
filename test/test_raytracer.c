@@ -153,7 +153,7 @@ START_TEST(test_intersects_polygon_hit)
     Point point = {.x = 2, .y = 2};
     Render_Polygon_2D polygon = create_intersetcion_test_polygin_2d();
 
-    int hit = Intersects_polygon_2d(&polygon, point);
+    int hit = intersects_polygon_2d(&polygon, point);
     destroy_intersection_polygon_2d(&polygon);
 
     ck_assert_int_eq(1, hit);
@@ -164,7 +164,7 @@ START_TEST(test_intersects_polygon_miss_left)
     Render_Polygon_2D polygon = create_intersetcion_test_polygin_2d();
     Point point = {.x = -3, .y = 2};
 
-    int hit = Intersects_polygon_2d(&polygon, point);
+    int hit = intersects_polygon_2d(&polygon, point);
 
     destroy_intersection_polygon_2d(&polygon);
 
@@ -177,7 +177,7 @@ START_TEST(test_intersects_polygon_miss_above)
     Render_Polygon_2D polygon = create_intersetcion_test_polygin_2d();
     Point point = {.x = 2, .y = 20};
 
-    int hit = Intersects_polygon_2d(&polygon, point);
+    int hit = intersects_polygon_2d(&polygon, point);
 
     destroy_intersection_polygon_2d(&polygon);
 
@@ -190,7 +190,7 @@ START_TEST(test_intersects_polygon_miss_below)
     Render_Polygon_2D polygon = create_intersetcion_test_polygin_2d();
     Point point = {.x = 2, .y = -1};
 
-    int hit = Intersects_polygon_2d(&polygon, point);
+    int hit = intersects_polygon_2d(&polygon, point);
 
     destroy_intersection_polygon_2d(&polygon);
 

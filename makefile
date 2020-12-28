@@ -2,8 +2,8 @@ CC=gcc
 debug: main.c raytracer.o texture_loader.o texture.o angle.o render_canvas.o
 	gcc main.c raytracer.o texture_loader.o texture.o angle.o render_canvas.o -o rt -lSDL2 -lSDL2_image -lm -g -fopenmp
 
-release: main.c raytracer.o texture_loader.o texture.o angle.o render_canvas.o render_line.o
-	gcc main.c raytracer.o texture_loader.o texture.o angle.o render_canvas.o render_line.o -o release -lSDL2 -lSDL2_image -lm -O3 -fopenmp
+release: main.c raytracer.o texture_loader.o texture.o angle.o render_canvas.o render_line.o render_polygon_2d.o
+	gcc main.c raytracer.o texture_loader.o texture.o angle.o render_canvas.o render_line.o render_polygon_2d.o -o release -lSDL2 -lSDL2_image -lm -g -O3 -fopenmp
 
 raytracer.o: src/raytracer.c
 	gcc src/raytracer.c -c -o raytracer.o -lm -g -fopenmp

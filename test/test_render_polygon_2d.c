@@ -23,9 +23,9 @@ START_TEST(test_create)
     Line lines[4] = {l1, l2, l3, l4};
     Polygon_2D polygon = {.lines = lines, .numLines = 4};
 
-    Render_Polygon_2D render_polygon = create_render_polygon_2d(&polygon);
-    ck_assert_int_eq(4, render_polygon.numlines);
-    ck_assert_double_eq(0, render_polygon.lines[0].a);
+    Render_Polygon_2D *render_polygon = create_render_polygon_2d(&polygon);
+    ck_assert_int_eq(4, render_polygon->numlines);
+    ck_assert_double_eq(0, render_polygon->lines[0].a);
     destroy_render_polygon_2d(render_polygon);
 }
 END_TEST

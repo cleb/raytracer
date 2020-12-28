@@ -1,8 +1,12 @@
 #pragma once
 #include "wall.h"
 #include "texture.h"
-typedef struct {
+#include "floor.h"
+typedef struct
+{
     Wall *walls;
-    int num_walls; 
-    Texture *floor;       
+    int num_walls;
+    Texture *floor;
+    Floor *floors;
+    int num_floors;
 } Scene;

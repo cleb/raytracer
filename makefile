@@ -6,22 +6,26 @@ release: main.c raytracer.o texture_loader.o texture.o angle.o render_canvas.o r
 	gcc main.c raytracer.o texture_loader.o texture.o angle.o render_canvas.o render_line.o render_polygon_2d.o -o release -lSDL2 -lSDL2_image -lm -g -O3 -fopenmp
 
 raytracer.o: src/raytracer.c
-	gcc src/raytracer.c -c -o raytracer.o -lm -g -fopenmp
+	gcc src/raytracer.c -c -o raytracer.o -lm -g -fopenmp -O3
 
 texture_loader.o: src/texture_loader.c
-	gcc src/texture_loader.c -c -o texture_loader.o -g
+	gcc src/texture_loader.c -c -o texture_loader.o -g -O3
 
 texture.o: src/texture.c
-	gcc src/texture.c -c -o texture.o -g
+	gcc src/texture.c -c -o texture.o -g -O3
 
 render_canvas.o: src/render_canvas.c
-	gcc src/render_canvas.c -c -o render_canvas.o -g
+	gcc src/render_canvas.c -c -o render_canvas.o -g -O3
 
 render_line.o: src/render_line.c
-	gcc src/render_line.c -c -o render_line.o -g
+	gcc src/render_line.c -c -o render_line.o -g -O3
 
 render_polygon_2d.o: src/render_polygon_2d.c
-	gcc src/render_polygon_2d.c -c -o render_polygon_2d.o -g
+	gcc src/render_polygon_2d.c -c -o render_polygon_2d.o -g -O3
+
+angle.o: src/angle.c 
+	gcc src/angle.c -c -o angle.o -g -O3
+
 
 #tests
 

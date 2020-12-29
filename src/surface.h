@@ -5,4 +5,4 @@ typedef struct
 {
     Polygon_2D *polygon;
     Texture *texture;
-} Floor;
+} Surface;

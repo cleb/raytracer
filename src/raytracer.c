@@ -8,7 +8,7 @@
 #include "raytracer.h"
 #include "texture.h"
 #include "render_polygon_2d.h"
-#include "render_floor.h"
+#include "render_surface.h"
 
 Point point_null = {.x = INFINITY, .y = INFINITY};
 Intersection intersection_null = {.point = {.x = INFINITY, .y = INFINITY}, .distance = INFINITY, .reflexivity = INFINITY};
@@ -206,12 +206,12 @@ Intersection intersects_floor(Angle alpha, Angle beta, double player_x, double p
     Point floor_intersect = {.x = floor_dist * alpha.cos + player_x, .y = floor_dist * alpha.sin + player_y};
     ret.point = floor_intersect;
 
-    ret.texture = scene->floor;
-    for (int i = 0; i < scene->num_floors; i++)
+    ret.texture = scene->surface;
+    for (int i = 0; i < scene->num_surfaces; i++)
     {
-        if (intersects_polygon_2d(scene->floors[i].polygon, floor_intersect))
+        if (intersects_polygon_2d(scene->surfaces[i].polygon, floor_intersect))
         {
-            ret.texture = scene->floors[i].texture;
+            ret.texture = scene->surfaces[i].texture;
         }
     }
 
@@ -347,40 +347,40 @@ Render_Scene *create_render_scene(Scene *scene)
         ret->walls[i].line = create_render_line(&scene->walls[i].line);
     }
 
-    //floors
-    ret->num_floors = scene->num_floors;
-    ret->floors = (Render_Floor *)malloc(scene->num_floors * sizeof(Render_Floor));
-    for (int i = 0; i < scene->num_floors; i++)
+    //surfaces
+    ret->num_surfaces = scene->num_surfaces;
+    ret->surfaces = (Render_Surface *)malloc(scene->num_surfaces * sizeof(Render_Surface));
+    for (int i = 0; i < scene->num_surfaces; i++)
     {
-        Floor *floor = &scene->floors[i];
-        ret->floors[i].floor = &scene->floors[i];
-        ret->floors[i].polygon = create_render_polygon_2d(scene->floors[i].polygon);
-        ret->floors[i].texture = scene->floors[i].texture;
+        Surface *surface = &scene->surfaces[i];
+        ret->surfaces[i].surface = &scene->surfaces[i];
+        ret->surfaces[i].polygon = create_render_polygon_2d(scene->surfaces[i].polygon);
+        ret->surfaces[i].texture = scene->surfaces[i].texture;
     }
 
     //global settings
     ret->max_bounce = 2;
-    ret->floor = scene->floor;
+    ret->surface = scene->surface;
     ret->num_intersection_buffers = (ret->max_bounce + 1) * omp_get_max_threads();
     
     ret->intersection_buffers = (Intersection_Buffer **)malloc(ret->num_intersection_buffers * sizeof(Intersection_Buffer*));
     for(int i = 0; i < ret->num_intersection_buffers; i++) {
-        ret->intersection_buffers[i] = create_intersection_buffer(scene->num_walls+scene->num_floors+1);
+        ret->intersection_buffers[i] = create_intersection_buffer(scene->num_walls+scene->num_surfaces+1);
     }
 
     return ret;
 }
 void destroy_render_scene(Render_Scene *scene)
 {
-    for (int i = 0; i < scene->num_floors; i++)
+    for (int i = 0; i < scene->num_surfaces; i++)
     {
-        destroy_render_polygon_2d(scene->floors[i].polygon);
+        destroy_render_polygon_2d(scene->surfaces[i].polygon);
     }
     for(int i = 0; i <= scene->num_intersection_buffers; i++) {
         destroy_intersection_buffer(scene->intersection_buffers[i]);
     }
     free(scene->intersection_buffers);
-    free(scene->floors);
+    free(scene->surfaces);
     free(scene->walls);
     free(scene);
 }

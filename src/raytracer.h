@@ -7,7 +7,7 @@
 #include "angle.h"
 #include "render_canvas.h"
 #include "render_line.h"
-#include "render_floor.h"
+#include "render_surface.h"
 
 typedef struct
 {
@@ -36,10 +36,10 @@ typedef struct
 {
     Render_Wall *walls;
     int num_walls;
-    Texture *floor;
+    Texture *surface;
     int max_bounce;
-    int num_floors;
-    Render_Floor *floors;
+    int num_surfaces;
+    Render_Surface *surfaces;
     Intersection_Buffer **intersection_buffers;
     int num_intersection_buffers;
 } Render_Scene;

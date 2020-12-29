@@ -31,13 +31,21 @@ void render(SDL_Renderer *renderer, double x, double y, double alpha, Render_Can
 
 int main(int argc, char *argv[])
 {
+    int render_width = 320;
+    int render_height = 240;
+
+    int window_width = 1024;
+    int window_height = 768;
+
     int active = 1;
     SDL_Event event;
     SDL_Renderer *renderer;
     SDL_Window *window;
 
     SDL_Init(SDL_INIT_EVERYTHING);
-    SDL_CreateWindowAndRenderer(320, 240, 0, &window, &renderer);
+    SDL_CreateWindowAndRenderer(window_width, window_height, 0, &window, &renderer);
+    SDL_RenderSetLogicalSize(renderer, render_width, render_height);
+
     SDL_SetWindowTitle(window, "raytracer");
 
     Texture *wall = load_texture("./wall.jpg");
@@ -75,7 +83,7 @@ int main(int argc, char *argv[])
     Scene scene = {.walls = scene_walls, .num_walls = 4, .surface = grass, .surfaces = scene_floors, .num_surfaces = 1};
 
     Render_Scene *render_scene = create_render_scene(&scene);
-    Render_Canvas *canvas = create_render_canvas(320, 240);
+    Render_Canvas *canvas = create_render_canvas(render_width, render_height);
 
     double x = 0;
     double y = 600;

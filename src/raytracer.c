@@ -117,6 +117,11 @@ Point get_intersection_point(Render_Wall *wall, double x, double y, double a, do
     return ret;
 }
 
+
+int division_would_be_less_than_0(double a, double b) {
+    return a > 0 && b < 0 || a < 0 && b > 0;
+}
+
 // returns the coordinates where the ray hit the wall if it hits, point_null otherwise
 Intersection intersects(double x, double y, double z, Angle alpha, Angle beta, Render_Wall *wall)
 {
@@ -133,7 +138,7 @@ Intersection intersects(double x, double y, double z, Angle alpha, Angle beta, R
     double intersection_x = intersection.x;
     double intersection_y = intersection.y;
 
-    if ((intersection_x - x) / alpha.cos < 0 || (intersection_y - y) / alpha.sin < 0)
+    if (division_would_be_less_than_0(intersection_x - x, alpha.cos) || division_would_be_less_than_0(intersection_y - y, alpha.sin))
     {
         //intersetion happened behind the viewer
         return intersection_null;

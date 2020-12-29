@@ -34,6 +34,11 @@ Render_Canvas *create_render_canvas(int screen_w, int screen_h) {
 
     }
 
+    ret->colors = (Color **) malloc(ret->screen_h * sizeof(Color *));
+    for(int i = 0; i < ret->screen_h; i++){
+        ret->colors[i]=(Color *)malloc(ret->screen_w * sizeof(Color));        
+    }
+
     ret->precomputed_angles = precompute_angles();
     return ret;
 }
@@ -48,6 +53,10 @@ Angle get_precomputed_angle(Render_Canvas *canvas, double angle) {
 }
 
 void destroy_render_canvas(Render_Canvas *canvas) {
+    for(int i = 0; i < canvas->screen_h; i++){
+        free(canvas->colors[i]);
+    }
+    free(canvas->colors);
     free(canvas->alpha);
     free(canvas->beta);
     free(canvas->precomputed_angles);

@@ -7,21 +7,21 @@
 
 void render(SDL_Renderer *renderer, double x, double y, double alpha, Render_Canvas *canvas, Render_Scene *scene)
 {
-    Color colors[320][240];
-#pragma omp parallel for
-    for (int s_y = 0; s_y < 240; s_y++)
+    Color **colors = canvas->colors;
+    #pragma omp parallel for
+    for (int s_y = 0; s_y < canvas->screen_h; s_y++)
     {
-        for (int s_x = 0; s_x < 320; s_x++)
+        for (int s_x = 0; s_x < canvas->screen_w; s_x++)
         {
-            colors[s_x][s_y] = render_pixel(x, y, 100.0f, alpha, s_x, s_y, canvas, scene);
+            colors[s_y][s_x] = render_pixel(x, y, 100.0f, alpha, s_x, s_y, canvas, scene);
         }
     }
 
-    for (int s_y = 0; s_y < 240; s_y++)
+    for (int s_y = 0; s_y < canvas->screen_h; s_y++)
     {
-        for (int s_x = 0; s_x < 320; s_x++)
+        for (int s_x = 0; s_x < canvas->screen_w; s_x++)
         {
-            SDL_SetRenderDrawColor(renderer, colors[s_x][s_y].r, colors[s_x][s_y].g, colors[s_x][s_y].b, 255);
+            SDL_SetRenderDrawColor(renderer, colors[s_y][s_x].r, colors[s_y][s_x].g, colors[s_y][s_x].b, 255);
             SDL_RenderDrawPoint(renderer, s_x, s_y);
         }
     }

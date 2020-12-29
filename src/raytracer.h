@@ -27,20 +27,22 @@ typedef struct
 
 typedef struct
 {
+    Intersection *buffer;
+    int size;
+    int top;
+} Intersection_Buffer;
+
+typedef struct
+{
     Render_Wall *walls;
     int num_walls;
     Texture *floor;
     int max_bounce;
     int num_floors;
     Render_Floor *floors;
+    Intersection_Buffer **intersection_buffers;
+    int num_intersection_buffers;
 } Render_Scene;
-
-typedef struct
-{
-    Intersection *buffer;
-    int size;
-    int top;
-} Intersection_Buffer;
 
 typedef struct
 {
@@ -59,3 +61,4 @@ void destroy_intersection_buffer(Intersection_Buffer *buffer);
 void add_to_intersection_buffer(Intersection_Buffer *buffer, Intersection *intersection);
 Intersection_Buffer_Iterator get_intersection_buffer_iterator(Intersection_Buffer *buffer);
 Intersection *intersection_buffer_iterator_get_next(Intersection_Buffer_Iterator *iterator);
+void reset_intersection_buffer(Intersection_Buffer *buffer);

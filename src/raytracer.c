@@ -1,5 +1,6 @@
 #include <math.h>
 #include <stdlib.h>
+#include <omp.h>
 #include "wall.h"
 #include "point.h"
 #include "color.h"
@@ -236,7 +237,7 @@ void adjust_intersection_buffer_top(Intersection_Buffer *buffer, int top)
 Intersection_Buffer_Iterator get_intersection_buffer_iterator(Intersection_Buffer *buffer)
 {
     qsort(buffer->buffer, buffer->top, sizeof(Intersection), compare_intersections);
-    Intersection_Buffer_Iterator iterator = {.current = buffer->buffer, .items = buffer->size};
+    Intersection_Buffer_Iterator iterator = {.current = buffer->buffer, .items = buffer->top};
     return iterator;
 }
 
@@ -259,7 +260,6 @@ void follow_ray(Color *color, Intersection *intersection, double alpha, double b
         double new_alpha = 2 * intersection->angle - alpha;
         double new_beta = beta;
         Angle new_alpha_angle = get_precomputed_angle(canvas, new_alpha);
-
         Color reflection_color = trace_ray(
             intersection->point_in_space.x + new_alpha_angle.cos,
             intersection->point_in_space.y + new_alpha_angle.sin,
@@ -279,8 +279,9 @@ Color trace_ray(double player_x, double player_y, double player_z, double alpha,
     Angle alpha_angle = get_precomputed_angle(canvas, alpha);
     Angle beta_angle = get_precomputed_angle(canvas, beta);
     Color color = {.r = ret_black.r, .g = ret_black.g, .b = ret_black.b};
-    Intersection_Buffer *intersection_buffer = create_intersection_buffer(scene->num_walls + 1);
-
+    int buffer_position = omp_get_thread_num() * (scene->max_bounce + 1) + max_bounce;
+    Intersection_Buffer *intersection_buffer = scene->intersection_buffers[buffer_position];
+    
     for (int i = 0; i < scene->num_walls; i++)
     {
         Intersection intersection = intersects(player_x, player_y, player_z, alpha_angle, beta_angle, &(scene->walls[i]));
@@ -312,8 +313,7 @@ Color trace_ray(double player_x, double player_y, double player_z, double alpha,
         }
     }
 
-    destroy_intersection_buffer(intersection_buffer);
-
+    reset_intersection_buffer(intersection_buffer);
     return color;
 }
 
@@ -331,6 +331,7 @@ Render_Scene *create_render_scene(Scene *scene)
     Render_Scene *ret = (Render_Scene *)malloc(sizeof(Render_Scene));
     ret->num_walls = scene->num_walls;
     ret->walls = (Render_Wall *)malloc(scene->num_walls * sizeof(Render_Wall));
+    
 
     for (int i = 0; i < scene->num_walls; i++)
     {
@@ -353,6 +354,12 @@ Render_Scene *create_render_scene(Scene *scene)
     //global settings
     ret->max_bounce = 2;
     ret->floor = scene->floor;
+    ret->num_intersection_buffers = (ret->max_bounce + 1) * omp_get_max_threads();
+    
+    ret->intersection_buffers = (Intersection_Buffer **)malloc(ret->num_intersection_buffers * sizeof(Intersection_Buffer*));
+    for(int i = 0; i < ret->num_intersection_buffers; i++) {
+        ret->intersection_buffers[i] = create_intersection_buffer(scene->num_walls+scene->num_floors+1);
+    }
 
     return ret;
 }
@@ -362,6 +369,10 @@ void destroy_render_scene(Render_Scene *scene)
     {
         destroy_render_polygon_2d(scene->floors[i].polygon);
     }
+    for(int i = 0; i <= scene->num_intersection_buffers; i++) {
+        destroy_intersection_buffer(scene->intersection_buffers[i]);
+    }
+    free(scene->intersection_buffers);
     free(scene->floors);
     free(scene->walls);
     free(scene);
@@ -373,6 +384,11 @@ Intersection_Buffer *create_intersection_buffer(int size)
     ret->buffer = (Intersection *)malloc(size * sizeof(Intersection));
     ret->size = size;
     ret->top = 0;
+    return ret;
+}
+
+void reset_intersection_buffer(Intersection_Buffer *buffer) {
+    buffer->top = 0;
 }
 
 void destroy_intersection_buffer(Intersection_Buffer *buffer)

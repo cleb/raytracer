@@ -69,10 +69,10 @@ int main(int argc, char *argv[])
 
     Line floor_lines[4] = {l1, l2, l3, l4};
     Polygon_2D polygon = {.lines = floor_lines, .numLines = 4};
-    Floor floor = {.polygon = &polygon, .texture = texture_floor};
-    Floor scene_floors[1] = {floor};
+    Surface surface = {.polygon = &polygon, .texture = texture_floor};
+    Surface scene_floors[1] = {surface};
 
-    Scene scene = {.walls = scene_walls, .num_walls = 4, .floor = grass, .floors = scene_floors, .num_floors = 1};
+    Scene scene = {.walls = scene_walls, .num_walls = 4, .surface = grass, .surfaces = scene_floors, .num_surfaces = 1};
 
     Render_Scene *render_scene = create_render_scene(&scene);
     Render_Canvas *canvas = create_render_canvas(320, 240);

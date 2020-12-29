@@ -144,7 +144,6 @@ Intersection intersects(double x, double y, double z, Angle alpha, Angle beta, R
         return intersection_null;
     }
 
-    double wall_x = sqrtl(pow((intersection_y - wall->wall->line.start.y), 2) + pow((intersection_x - wall->wall->line.start.x), 2));
     double dist_from_wall = sqrtl(pow((intersection_y - y), 2) + pow((intersection_x - x), 2));
     double wall_y = dist_from_wall * beta.tg + z;
 
@@ -152,6 +151,9 @@ Intersection intersects(double x, double y, double z, Angle alpha, Angle beta, R
     {
         return intersection_null;
     }
+
+    double wall_x = sqrtl(pow((intersection_y - wall->wall->line.start.y), 2) + pow((intersection_x - wall->wall->line.start.x), 2));
+    
 
     Intersection ret = {
         .point = {.x = wall_x, .y = wall_y},

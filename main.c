@@ -32,8 +32,8 @@ void render(SDL_Renderer *renderer, double x, double y, double alpha, Render_Can
 
 int main(int argc, char *argv[])
 {
-    int render_width = 320;
-    int render_height = 240;
+    int render_width = 160;
+    int render_height = 120;
 
     int window_width = 1024;
     int window_height = 768;

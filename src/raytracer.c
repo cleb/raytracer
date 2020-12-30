@@ -195,50 +195,37 @@ int intersects_polygon_2d(Render_Polygon_2D *polygon, Point point)
     return 0;
 }
 
-Intersection intersects_floor(Angle alpha, Angle beta, double player_x, double player_y, double player_z, Render_Canvas *canvas, Render_Scene *scene)
+Intersection intersects_surface(Render_Surface *surface, Angle alpha, Angle beta, double player_x, double player_y, double player_z, Render_Canvas *canvas, Render_Scene *scene)
 {
     Intersection ret;
     double inverse_beta = M_PI_2 - beta.angle;
     Angle inverse_beta_angle = get_precomputed_angle(canvas, inverse_beta);
+    
     double floor_dist = inverse_beta_angle.tg * player_z * -1;
     double ray_floor_dist = sqrt(pow(floor_dist, 2) + pow(player_z, 2));
     ret.distance = ray_floor_dist;
     Point floor_intersect = {.x = floor_dist * alpha.cos + player_x, .y = floor_dist * alpha.sin + player_y};
     ret.point = floor_intersect;
-
-    ret.texture = scene->surface;
-    for (int i = 0; i < scene->num_surfaces; i++)
+    
+    if (intersects_polygon_2d(surface->polygon, floor_intersect))
     {
-        if (intersects_polygon_2d(scene->surfaces[i].polygon, floor_intersect))
-        {
-            ret.texture = scene->surfaces[i].texture;
-        }
+        ret.texture = surface->texture;
+        ret.angle = 0;
+        ret.reflexivity = 0;
+        Point_3 floor_point_in_space = {
+            .x = floor_intersect.x,
+            .y = floor_intersect.y,
+            .z = 0};
+        ret.point_in_space = floor_point_in_space;
+        return ret;
     }
-
-    ret.angle = 0;
-    ret.reflexivity = 0;
-    Point_3 floor_point_in_space = {
-        .x = floor_intersect.x,
-        .y = floor_intersect.y,
-        .z = 0};
-    ret.point_in_space = floor_point_in_space;
-    return ret;
+    return intersection_null;
 }
 
 void add_to_intersection_buffer(Intersection_Buffer *buffer, Intersection *intersection)
 {
     copy_intersection(intersection, &buffer->buffer[buffer->top]);
     buffer->top++;
-}
-
-void insert_to_intersection_buffer(Intersection_Buffer *buffer, Intersection *intersection, int index)
-{
-    copy_intersection(intersection, &buffer->buffer[index]);
-}
-
-void adjust_intersection_buffer_top(Intersection_Buffer *buffer, int top)
-{
-    buffer->top = top;
 }
 
 Intersection_Buffer_Iterator get_intersection_buffer_iterator(Intersection_Buffer *buffer)
@@ -292,14 +279,15 @@ Color trace_ray(double player_x, double player_y, double player_z, double alpha,
     for (int i = 0; i < scene->num_walls; i++)
     {
         Intersection intersection = intersects(player_x, player_y, player_z, alpha_angle, beta_angle, &(scene->walls[i]));
-        insert_to_intersection_buffer(intersection_buffer, &intersection, i);
+        add_to_intersection_buffer(intersection_buffer, &intersection);
     }
-    adjust_intersection_buffer_top(intersection_buffer, scene->num_walls);
 
     if (beta_angle.sin < 0)
     {
-        Intersection floor_intersection = intersects_floor(alpha_angle, beta_angle, player_x, player_y, player_z, canvas, scene);
-        add_to_intersection_buffer(intersection_buffer, &floor_intersection);
+        for(int i = 0; i < scene->num_surfaces; i++) {
+            Intersection floor_intersection = intersects_surface(&scene->surfaces[i], alpha_angle, beta_angle, player_x, player_y, player_z, canvas, scene);
+            add_to_intersection_buffer(intersection_buffer, &floor_intersection);            
+        }
     }
     else
     {

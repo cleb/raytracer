@@ -153,11 +153,13 @@ Intersection intersects(double x, double y, double z, Angle alpha, Angle beta, R
     }
 
     double wall_x = sqrtl(pow((intersection_y - wall->wall->line.start.y), 2) + pow((intersection_x - wall->wall->line.start.x), 2));
+
+    double ray_dist = sqrtl(pow(z - wall_y,2) + pow(dist_from_wall,2));
     
 
     Intersection ret = {
         .point = {.x = wall_x, .y = wall_y},
-        .distance = dist_from_wall,
+        .distance = ray_dist,
         .texture = wall->wall->texture,
         .reflexivity = wall->wall->reflexivity,
         .point_in_space = {.x = intersection_x, .y = intersection_y, .z = wall_y},

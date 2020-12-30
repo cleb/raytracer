@@ -198,23 +198,45 @@ int intersects_polygon_2d(Render_Polygon_2D *polygon, Point point)
 Intersection intersects_surface(Render_Surface *surface, Angle alpha, Angle beta, double player_x, double player_y, double player_z, Render_Canvas *canvas, Render_Scene *scene)
 {
     Intersection ret;
-    double inverse_beta = M_PI_2 - beta.angle;
-    Angle inverse_beta_angle = get_precomputed_angle(canvas, inverse_beta);
+    Angle real_beta = beta;
+    int modifier = 1;
+    if(beta.sin < 0) {
+        if(surface->surface->z > player_z) {
+            return intersection_null;
+        }
+
+        double inverse_beta = M_PI_2 - beta.angle;
+        Angle inverse_beta_angle = get_precomputed_angle(canvas, inverse_beta);
+        double floor_dist = inverse_beta_angle.tg * (player_z - surface->surface->z) * -1;
+        double ray_floor_dist = sqrt(pow(floor_dist, 2) + pow((player_z - surface->surface->z), 2));
+        ret.distance = ray_floor_dist;
+        Point floor_intersect = {.x = floor_dist * alpha.cos + player_x, .y = floor_dist * alpha.sin + player_y};
+        ret.point = floor_intersect;
+
+    } else {
+        if(surface->surface->z < player_z) {
+            return intersection_null;
+        }
+        
+        double ceil_dist = (surface->surface->z - player_z) / beta.tg;
+        double ray_ceil_dist = sqrt(pow(ceil_dist, 2) + pow((surface->surface->z - player_z), 2));
+        ret.distance = ray_ceil_dist;
+        Point ceil_intersect = {.x = ceil_dist * alpha.cos + player_x, .y = ceil_dist * alpha.sin + player_y};
+        ret.point = ceil_intersect;
+    }
     
-    double floor_dist = inverse_beta_angle.tg * player_z * -1;
-    double ray_floor_dist = sqrt(pow(floor_dist, 2) + pow(player_z, 2));
-    ret.distance = ray_floor_dist;
-    Point floor_intersect = {.x = floor_dist * alpha.cos + player_x, .y = floor_dist * alpha.sin + player_y};
-    ret.point = floor_intersect;
     
-    if (intersects_polygon_2d(surface->polygon, floor_intersect))
+    
+    
+    
+    if (intersects_polygon_2d(surface->polygon, ret.point))
     {
         ret.texture = surface->texture;
         ret.angle = 0;
         ret.reflexivity = 0;
         Point_3 floor_point_in_space = {
-            .x = floor_intersect.x,
-            .y = floor_intersect.y,
+            .x = ret.point.x,
+            .y = ret.point.y,
             .z = 0};
         ret.point_in_space = floor_point_in_space;
         return ret;
@@ -282,16 +304,9 @@ Color trace_ray(double player_x, double player_y, double player_z, double alpha,
         add_to_intersection_buffer(intersection_buffer, &intersection);
     }
 
-    if (beta_angle.sin < 0)
-    {
-        for(int i = 0; i < scene->num_surfaces; i++) {
-            Intersection floor_intersection = intersects_surface(&scene->surfaces[i], alpha_angle, beta_angle, player_x, player_y, player_z, canvas, scene);
-            add_to_intersection_buffer(intersection_buffer, &floor_intersection);            
-        }
-    }
-    else
-    {
-        add_to_intersection_buffer(intersection_buffer, &intersection_null);
+    for(int i = 0; i < scene->num_surfaces; i++) {
+        Intersection floor_intersection = intersects_surface(&scene->surfaces[i], alpha_angle, beta_angle, player_x, player_y, player_z, canvas, scene);
+        add_to_intersection_buffer(intersection_buffer, &floor_intersection);            
     }
 
     Intersection_Buffer_Iterator iterator = get_intersection_buffer_iterator(intersection_buffer);

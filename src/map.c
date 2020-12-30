@@ -104,19 +104,22 @@ Map *load_map(char *filename) {
     walls[2] = w3;
     walls[3] = w4;
 
-    Surface floor_inside = {.polygon = create_square_polygon(l1,l2,l3,l4), .texture = texture_floor};
+    Surface floor_inside = {.polygon = create_square_polygon(l1,l2,l3,l4), .texture = texture_floor, .z = 0};
 
-    Surface floor_outside = {.polygon = create_square_polygon(fl1,fl2,fl3,fl4), .texture = grass};
+    Surface ceiling_inside = {.polygon = create_square_polygon(l1,l2,l3,l4), .texture = texture_floor, .z = 200};
 
-    Surface floor_outside_2 = {.polygon = create_square_polygon(f2l1,f2l2,f2l3,f2l4), .texture = grass};
+    Surface floor_outside = {.polygon = create_square_polygon(fl1,fl2,fl3,fl4), .texture = grass, .z = 0};
 
-    Surface floor_outside_3 = {.polygon = create_square_polygon(f3l1,f3l2,f3l3,f3l4), .texture = grass};
+    Surface floor_outside_2 = {.polygon = create_square_polygon(f2l1,f2l2,f2l3,f2l4), .texture = grass, .z = 0};
 
-    Surface * surfaces = (Surface *)malloc(4 * sizeof(Surface));
+    Surface floor_outside_3 = {.polygon = create_square_polygon(f3l1,f3l2,f3l3,f3l4), .texture = grass, .z = 0};
+
+    Surface * surfaces = (Surface *)malloc(5 * sizeof(Surface));
     surfaces[0] = floor_outside;
     surfaces[1] = floor_outside_2;
     surfaces[2] = floor_outside_3;
     surfaces[3] = floor_inside;
+    surfaces[4] = ceiling_inside;
 
     Map *map = (Map *)malloc(sizeof(Map));
     map->textures = textures;
@@ -124,7 +127,7 @@ Map *load_map(char *filename) {
     map->walls = walls;
     map->num_walls = 4;
     map->surfaces = surfaces;
-    map->num_surfaces = 4;
+    map->num_surfaces = 5;
     return map;
 }
 

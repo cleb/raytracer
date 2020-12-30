@@ -348,7 +348,6 @@ Render_Scene *create_render_scene(Scene *scene)
 
     //global settings
     ret->max_bounce = 2;
-    ret->surface = scene->surface;
     ret->num_intersection_buffers = (ret->max_bounce + 1) * omp_get_max_threads();
     
     ret->intersection_buffers = (Intersection_Buffer **)malloc(ret->num_intersection_buffers * sizeof(Intersection_Buffer*));

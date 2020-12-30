@@ -36,7 +36,6 @@ typedef struct
 {
     Render_Wall *walls;
     int num_walls;
-    Texture *surface;
     int max_bounce;
     int num_surfaces;
     Render_Surface *surfaces;

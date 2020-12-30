@@ -23,14 +23,14 @@ Map *load_map(char *filename) {
     Texture *grass = load_texture("./grass.jpg");
     Texture *glass = load_texture("./glass.png");
     Texture *wood = load_texture("./wood.jpg");
-    Texture *gravel = load_texture("./gravel.jpg");
+    Texture *flowers = load_texture("./flowers.jpg");
     Texture **textures = (Texture **)malloc(6 * sizeof(Texture *));
     textures[0] = wall;
     textures[1] = texture_floor;
     textures[2] = grass;
     textures[3] = glass;
     textures[4] = wood;
-    textures[5] = gravel;
+    textures[5] = flowers;
 
     //map geometry
     Point p1 = {.x = -400, .y = 400};
@@ -160,7 +160,7 @@ Map *load_map(char *filename) {
     garden_polygon->lines = garden_lines;
     garden_polygon->numLines = 8;
 
-    Surface garden = {.polygon = garden_polygon, .texture = gravel, .z = 20};
+    Surface garden = {.polygon = garden_polygon, .texture = flowers, .z = 20};
 
     Surface floor_inside = {.polygon = create_square_polygon(l1,l2,l3,l4), .texture = texture_floor, .z = 0};
 

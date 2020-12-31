@@ -20,19 +20,12 @@ void destroy_intersection_buffer(Intersection_Buffer *buffer);
 
 void copy_point(Point *src, Point *dest)
 {
-    dest->x = src->x;
-    dest->y = src->y;
+    *dest = *src;
 }
 
 void copy_intersection(Intersection *src, Intersection *dest)
 {
-    dest->distance = src->distance;
-    dest->reflexivity = src->reflexivity;
-    dest->angle = src->angle;
-    dest->point_in_space = src->point_in_space;
-    dest->point = src->point;
-    dest->texture = src->texture;
-    copy_point(&src->point, &dest->point);
+    *dest = *src;
 }
 
 void add_color(Color *c1, Color *c2)

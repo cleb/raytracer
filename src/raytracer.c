@@ -313,7 +313,6 @@ void follow_ray(Color *color, Intersection *intersection, double alpha, double b
             canvas,
             scene,
             max_bounce - 1);
-        reflection_color.alpha = intersection->reflexivity * 255;
         reflection_color.alpha_double = intersection->reflexivity;
         add_color(color, &reflection_color);
     }

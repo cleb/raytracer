@@ -219,8 +219,6 @@ int intersects_polygon_2d(Render_Polygon_2D *polygon, Point point)
 Intersection intersects_surface(Render_Surface *surface, Angle alpha, Angle beta, double player_x, double player_y, double player_z, Render_Canvas *canvas, Render_Scene *scene)
 {
     Intersection ret;
-    Angle real_beta = beta;
-    int modifier = 1;
     if(beta.sin < 0) {
         if(surface->surface->z > player_z) {
             return intersection_null;

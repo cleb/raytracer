@@ -122,9 +122,28 @@ int division_would_be_less_than_0(double a, double b) {
     return a > 0 && b < 0 || a < 0 && b > 0;
 }
 
+int intersection_is_impossible(double x, double y, double z, Angle alpha, Angle beta, Render_Wall *wall) {
+    if(alpha.sin > 0 && wall->line.line->start.y < y && wall->line.line->end.y < y) {
+        return 1;
+    }
+    if(alpha.sin < 0 && wall->line.line->start.y > y && wall->line.line->end.y > y) {
+        return 1;
+    }
+    if(alpha.cos > 0 && wall->line.line->end.x < x) {
+        return 1;
+    }
+    if(alpha.cos < 0 && wall->line.line->start.x > x) {
+        return 1;
+    }
+    return 0;
+}
+
 // returns the coordinates where the ray hit the wall if it hits, point_null otherwise
 Intersection intersects(double x, double y, double z, Angle alpha, Angle beta, Render_Wall *wall)
 {
+    if(intersection_is_impossible(x , y, z, alpha, beta, wall)) {
+        return intersection_null;
+    }
     double a = wall->line.a;
     double b = wall->line.b;
 

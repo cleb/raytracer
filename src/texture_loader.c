@@ -20,6 +20,7 @@ Texture *load_texture(const char* filename) {
             ret->pixels[y * ret->w + x].g = pixels[(y * ret->w + x) * 4 + 1];
             ret->pixels[y * ret->w + x].b = pixels[(y * ret->w + x) * 4 + 2];
             ret->pixels[y * ret->w + x].alpha = pixels[(y * ret->w + x) * 4 + 3];
+            ret->pixels[y * ret->w + x].alpha_double = ret->pixels[y * ret->w + x].alpha / 255.0f;
         }
     }
     return ret;        

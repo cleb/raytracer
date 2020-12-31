@@ -30,7 +30,7 @@ void copy_intersection(Intersection *src, Intersection *dest)
 
 void add_color(Color *c1, Color *c2)
 {
-    double alpha = c2->alpha / 255.0f;
+    double alpha = c2->alpha_double;
     double inverse_alpha = 1 - alpha;
     c1->r = inverse_alpha * c1->r + alpha * c2->r;
     c1->g = inverse_alpha * c1->g + alpha * c2->g;
@@ -314,6 +314,7 @@ void follow_ray(Color *color, Intersection *intersection, double alpha, double b
             scene,
             max_bounce - 1);
         reflection_color.alpha = intersection->reflexivity * 255;
+        reflection_color.alpha_double = reflection_color.alpha / 255.0f;
         add_color(color, &reflection_color);
     }
 }

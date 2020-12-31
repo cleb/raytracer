@@ -4,4 +4,5 @@ typedef struct {
     unsigned char g;
     unsigned char b;
     unsigned char alpha;
+    double alpha_double;
 } Color;

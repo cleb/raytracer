@@ -17,7 +17,7 @@ START_TEST(test_intersects_direct)
     Angle alpha = {.angle = M_PI_2, .cos = 0, .sin = 1, .tg = INFINITY};
     Angle beta = {.angle = 0, .cos = 1, .sin = 0, .tg = 0};
     Intersection intersection = intersects(0, 0, 0, alpha, beta, &wall);
-    ck_assert_double_eq(10, intersection.distance);
+    ck_assert_double_eq(10, intersection.distance_squared);
 }
 END_TEST
 
@@ -32,7 +32,7 @@ START_TEST(test_intersects_angle)
     Angle alpha = {.angle = 0, .cos = 1, .sin = 0, .tg = 0};
     Angle beta = {.angle = 0, .cos = 1, .sin = 0, .tg = 0};
     Intersection intersection = intersects(0, 0, 0, alpha, beta, &wall);
-    ck_assert_double_eq(5, intersection.distance);
+    ck_assert_double_eq(5, intersection.distance_squared);
 }
 END_TEST
 
@@ -47,7 +47,7 @@ START_TEST(test_intersects_miss)
     Angle alpha = {.angle = 0, .cos = 1, .sin = 0, .tg = 0};
     Angle beta = {.angle = 0, .cos = 1, .sin = 0, .tg = 0};
     Intersection intersection = intersects(0, 0, 0, alpha, beta, &wall);
-    ck_assert_double_eq(INFINITY, intersection.distance);
+    ck_assert_double_eq(INFINITY, intersection.distance_squared);
 }
 END_TEST
 
@@ -82,20 +82,20 @@ END_TEST
 START_TEST(test_add_to_intersection_buffer)
 {
     Intersection_Buffer *buffer = create_intersection_buffer(10);
-    Intersection intersection = {.angle = 1, .distance = 1};
+    Intersection intersection = {.angle = 1, .distance_squared = 1};
     add_to_intersection_buffer(buffer, &intersection);
 
     ck_assert_int_eq(1, buffer->top);
     ck_assert_double_eq(1, buffer->buffer[0].angle);
-    ck_assert_double_eq(1, buffer->buffer[0].distance);
+    ck_assert_double_eq(1, buffer->buffer[0].distance_squared);
     destroy_intersection_buffer(buffer);
 }
 
 START_TEST(test_iterate_intersection_buffer)
 {
     Intersection_Buffer *buffer = create_intersection_buffer(2);
-    Intersection intersection = {.angle = 1, .distance = 1};
-    Intersection intersection2 = {.angle = 2, .distance = 2};
+    Intersection intersection = {.angle = 1, .distance_squared = 1};
+    Intersection intersection2 = {.angle = 2, .distance_squared = 2};
     add_to_intersection_buffer(buffer, &intersection);
     add_to_intersection_buffer(buffer, &intersection2);
 
@@ -106,9 +106,9 @@ START_TEST(test_iterate_intersection_buffer)
     Intersection *third = intersection_buffer_iterator_get_next(&iterator);
 
     ck_assert_double_eq(2, first->angle);
-    ck_assert_double_eq(2, first->distance);
+    ck_assert_double_eq(2, first->distance_squared);
     ck_assert_double_eq(1, second->angle);
-    ck_assert_double_eq(1, second->distance);
+    ck_assert_double_eq(1, second->distance_squared);
     ck_assert(third == NULL);
     destroy_intersection_buffer(buffer);
 }

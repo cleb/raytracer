@@ -11,7 +11,7 @@
 #include "render_surface.h"
 
 Point point_null = {.x = INFINITY, .y = INFINITY};
-Intersection intersection_null = {.point = {.x = INFINITY, .y = INFINITY}, .distance = INFINITY, .reflexivity = INFINITY};
+Intersection intersection_null = {.point = {.x = INFINITY, .y = INFINITY}, .distance_squared = INFINITY, .reflexivity = INFINITY};
 Color ret_black = {.r = 0, .g = 0, .b = 0};
 
 Color trace_ray(double player_x, double player_y, double player_z, double alpha, double beta, Render_Canvas *canvas, Render_Scene *scene, int max_bounce);
@@ -44,14 +44,14 @@ int point_equals(Point p1, Point p2)
 
 int intersection_equals(Intersection *i1, Intersection *i2)
 {
-    return i1->distance == i2->distance && point_equals(i1->point, i2->point);
+    return i1->distance_squared == i2->distance_squared && point_equals(i1->point, i2->point);
 }
 
 int compare_intersections(const void *b, const void *a)
 {
     Intersection *a_intersection = (Intersection *)a;
     Intersection *b_intersection = (Intersection *)b;
-    return a_intersection->distance > b_intersection->distance ? 1 : -1;
+    return a_intersection->distance_squared > b_intersection->distance_squared ? 1 : -1;
 }
 
 Point get_intersection_straight(Render_Wall *wall, double pa, double pb)
@@ -172,11 +172,11 @@ Intersection intersects(double x, double y, double z, Angle alpha, Angle beta, R
 
     double wall_x = sqrtl(pow((intersection_y - wall->wall->line.start.y), 2) + pow((intersection_x - wall->wall->line.start.x), 2));
 
-    double ray_dist = sqrtl(pow(z - wall_y, 2) + pow(dist_from_wall, 2));
+    double ray_dist = (pow(z - wall_y, 2) + pow(dist_from_wall, 2));
 
     Intersection ret = {
         .point = {.x = wall_x, .y = wall_y},
-        .distance = ray_dist,
+        .distance_squared = ray_dist,
         .texture = wall->wall->texture,
         .reflexivity = wall->wall->reflexivity,
         .point_in_space = {.x = intersection_x, .y = intersection_y, .z = wall_y},
@@ -231,8 +231,8 @@ Intersection intersects_surface(Render_Surface *surface, Angle alpha, Angle beta
         double inverse_beta = M_PI_2 - beta.angle;
         Angle inverse_beta_angle = get_precomputed_angle(canvas, inverse_beta);
         double floor_dist = inverse_beta_angle.tg * (surface->surface->z - player_z);
-        double ray_floor_dist = sqrt(pow(floor_dist, 2) + pow((player_z - surface->surface->z), 2));
-        ret.distance = ray_floor_dist;
+        double ray_floor_dist = (pow(floor_dist, 2) + pow((player_z - surface->surface->z), 2));
+        ret.distance_squared = ray_floor_dist;
         Point floor_intersect = {.x = floor_dist * alpha.cos + player_x, .y = floor_dist * alpha.sin + player_y};
         ret.point = floor_intersect;
     }
@@ -244,8 +244,8 @@ Intersection intersects_surface(Render_Surface *surface, Angle alpha, Angle beta
         }
 
         double ceil_dist = (surface->surface->z - player_z) / beta.tg;
-        double ray_ceil_dist = sqrt(pow(ceil_dist, 2) + pow((surface->surface->z - player_z), 2));
-        ret.distance = ray_ceil_dist;
+        double ray_ceil_dist = (pow(ceil_dist, 2) + pow((surface->surface->z - player_z), 2));
+        ret.distance_squared = ray_ceil_dist;
         Point ceil_intersect = {.x = ceil_dist * alpha.cos + player_x, .y = ceil_dist * alpha.sin + player_y};
         ret.point = ceil_intersect;
     }

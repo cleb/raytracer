@@ -17,7 +17,7 @@ typedef struct
 
 typedef struct
 {
-    double distance;
+    double distance_squared;
     Point point;
     Point_3 point_in_space;
     Texture *texture;

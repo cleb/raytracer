@@ -110,22 +110,27 @@ Point get_intersection_point(Render_Wall *wall, double x, double y, double a, do
     return ret;
 }
 
-
-int division_would_be_less_than_0(double a, double b) {
+int division_would_be_less_than_0(double a, double b)
+{
     return a > 0 && b < 0 || a < 0 && b > 0;
 }
 
-int intersection_is_impossible(double x, double y, double z, Angle alpha, Angle beta, Render_Wall *wall) {
-    if(alpha.sin > 0 && wall->line.line->start.y < y && wall->line.line->end.y < y) {
+int intersection_is_impossible(double x, double y, double z, Angle alpha, Angle beta, Render_Wall *wall)
+{
+    if (alpha.sin > 0 && wall->line.line->start.y < y && wall->line.line->end.y < y)
+    {
         return 1;
     }
-    if(alpha.sin < 0 && wall->line.line->start.y > y && wall->line.line->end.y > y) {
+    if (alpha.sin < 0 && wall->line.line->start.y > y && wall->line.line->end.y > y)
+    {
         return 1;
     }
-    if(alpha.cos > 0 && wall->line.line->end.x < x) {
+    if (alpha.cos > 0 && wall->line.line->end.x < x)
+    {
         return 1;
     }
-    if(alpha.cos < 0 && wall->line.line->start.x > x) {
+    if (alpha.cos < 0 && wall->line.line->start.x > x)
+    {
         return 1;
     }
     return 0;
@@ -134,7 +139,8 @@ int intersection_is_impossible(double x, double y, double z, Angle alpha, Angle 
 // returns the coordinates where the ray hit the wall if it hits, point_null otherwise
 Intersection intersects(double x, double y, double z, Angle alpha, Angle beta, Render_Wall *wall)
 {
-    if(intersection_is_impossible(x , y, z, alpha, beta, wall)) {
+    if (intersection_is_impossible(x, y, z, alpha, beta, wall))
+    {
         return intersection_null;
     }
     double a = wall->line.a;
@@ -166,8 +172,7 @@ Intersection intersects(double x, double y, double z, Angle alpha, Angle beta, R
 
     double wall_x = sqrtl(pow((intersection_y - wall->wall->line.start.y), 2) + pow((intersection_x - wall->wall->line.start.x), 2));
 
-    double ray_dist = sqrtl(pow(z - wall_y,2) + pow(dist_from_wall,2));
-    
+    double ray_dist = sqrtl(pow(z - wall_y, 2) + pow(dist_from_wall, 2));
 
     Intersection ret = {
         .point = {.x = wall_x, .y = wall_y},
@@ -176,10 +181,10 @@ Intersection intersects(double x, double y, double z, Angle alpha, Angle beta, R
         .reflexivity = wall->wall->reflexivity,
         .point_in_space = {.x = intersection_x, .y = intersection_y, .z = wall_y},
         .angle = wall->line.angle};
-    
+
     ret.color = get_color(ret.texture,
-                        ret.point.x,
-                        ret.point.y);
+                          ret.point.x,
+                          ret.point.y);
     return ret;
 }
 
@@ -216,8 +221,10 @@ int intersects_polygon_2d(Render_Polygon_2D *polygon, Point point)
 Intersection intersects_surface(Render_Surface *surface, Angle alpha, Angle beta, double player_x, double player_y, double player_z, Render_Canvas *canvas, Render_Scene *scene)
 {
     Intersection ret;
-    if(beta.sin < 0) {
-        if(surface->surface->z > player_z) {
+    if (beta.sin < 0)
+    {
+        if (surface->surface->z > player_z)
+        {
             return intersection_null;
         }
 
@@ -228,23 +235,21 @@ Intersection intersects_surface(Render_Surface *surface, Angle alpha, Angle beta
         ret.distance = ray_floor_dist;
         Point floor_intersect = {.x = floor_dist * alpha.cos + player_x, .y = floor_dist * alpha.sin + player_y};
         ret.point = floor_intersect;
-
-    } else {
-        if(surface->surface->z < player_z) {
+    }
+    else
+    {
+        if (surface->surface->z < player_z)
+        {
             return intersection_null;
         }
-        
+
         double ceil_dist = (surface->surface->z - player_z) / beta.tg;
         double ray_ceil_dist = sqrt(pow(ceil_dist, 2) + pow((surface->surface->z - player_z), 2));
         ret.distance = ray_ceil_dist;
         Point ceil_intersect = {.x = ceil_dist * alpha.cos + player_x, .y = ceil_dist * alpha.sin + player_y};
         ret.point = ceil_intersect;
     }
-    
-    
-    
-    
-    
+
     if (intersects_polygon_2d(surface->polygon, ret.point))
     {
         ret.texture = surface->texture;
@@ -256,8 +261,8 @@ Intersection intersects_surface(Render_Surface *surface, Angle alpha, Angle beta
             .z = 0};
         ret.point_in_space = floor_point_in_space;
         ret.color = get_color(ret.texture,
-                            ret.point.x,
-                            ret.point.y);
+                              ret.point.x,
+                              ret.point.y);
         return ret;
     }
     return intersection_null;
@@ -276,9 +281,12 @@ Intersection_Buffer_Iterator get_intersection_buffer_iterator(Intersection_Buffe
     return iterator;
 }
 
-void intersection_buffer_iterator_skip_obscured(Intersection_Buffer_Iterator *iterator) {
-    for(int i = iterator->buffer->top - 1; i > 0; i--) {
-        if(iterator->buffer->buffer[i].color->alpha == 255) {
+void intersection_buffer_iterator_skip_obscured(Intersection_Buffer_Iterator *iterator)
+{
+    for (int i = iterator->buffer->top - 1; i > 0; i--)
+    {
+        if (iterator->buffer->buffer[i].color->alpha == 255)
+        {
             iterator->current = &iterator->buffer->buffer[i];
             iterator->items = iterator->buffer->top - i;
         }
@@ -322,22 +330,25 @@ Color trace_ray(double player_x, double player_y, double player_z, double alpha,
 {
     Angle alpha_angle = get_precomputed_angle(canvas, alpha);
     Angle beta_angle = get_precomputed_angle(canvas, beta);
-    Color color = {.r = ret_black.r, .g = ret_black.g, .b = ret_black.b};
+    Color color = {.r = ret_black.r, .g = ret_black.g, .b = ret_black.b, .alpha = 255, .alpha_double = 1};
     int buffer_position = omp_get_thread_num() * (scene->max_bounce + 1) + max_bounce;
     Intersection_Buffer *intersection_buffer = scene->intersection_buffers[buffer_position];
-    
+
     for (int i = 0; i < scene->num_walls; i++)
     {
         Intersection intersection = intersects(player_x, player_y, player_z, alpha_angle, beta_angle, &(scene->walls[i]));
-        if(!intersection_equals(&intersection,&intersection_null)) {
+        if (!intersection_equals(&intersection, &intersection_null))
+        {
             add_to_intersection_buffer(intersection_buffer, &intersection);
         }
     }
 
-    for(int i = 0; i < scene->num_surfaces; i++) {
+    for (int i = 0; i < scene->num_surfaces; i++)
+    {
         Intersection floor_intersection = intersects_surface(&scene->surfaces[i], alpha_angle, beta_angle, player_x, player_y, player_z, canvas, scene);
-        if(!intersection_equals(&floor_intersection,&intersection_null)) {
-            add_to_intersection_buffer(intersection_buffer, &floor_intersection);            
+        if (!intersection_equals(&floor_intersection, &intersection_null))
+        {
+            add_to_intersection_buffer(intersection_buffer, &floor_intersection);
         }
     }
 
@@ -371,7 +382,6 @@ Render_Scene *create_render_scene(Scene *scene)
     Render_Scene *ret = (Render_Scene *)malloc(sizeof(Render_Scene));
     ret->num_walls = scene->num_walls;
     ret->walls = (Render_Wall *)malloc(scene->num_walls * sizeof(Render_Wall));
-    
 
     for (int i = 0; i < scene->num_walls; i++)
     {
@@ -394,10 +404,11 @@ Render_Scene *create_render_scene(Scene *scene)
     //global settings
     ret->max_bounce = 2;
     ret->num_intersection_buffers = (ret->max_bounce + 1) * omp_get_max_threads();
-    
-    ret->intersection_buffers = (Intersection_Buffer **)malloc(ret->num_intersection_buffers * sizeof(Intersection_Buffer*));
-    for(int i = 0; i < ret->num_intersection_buffers; i++) {
-        ret->intersection_buffers[i] = create_intersection_buffer(scene->num_walls+scene->num_surfaces+1);
+
+    ret->intersection_buffers = (Intersection_Buffer **)malloc(ret->num_intersection_buffers * sizeof(Intersection_Buffer *));
+    for (int i = 0; i < ret->num_intersection_buffers; i++)
+    {
+        ret->intersection_buffers[i] = create_intersection_buffer(scene->num_walls + scene->num_surfaces + 1);
     }
 
     return ret;
@@ -408,7 +419,8 @@ void destroy_render_scene(Render_Scene *scene)
     {
         destroy_render_polygon_2d(scene->surfaces[i].polygon);
     }
-    for(int i = 0; i <= scene->num_intersection_buffers; i++) {
+    for (int i = 0; i < scene->num_intersection_buffers; i++)
+    {
         destroy_intersection_buffer(scene->intersection_buffers[i]);
     }
     free(scene->intersection_buffers);
@@ -426,7 +438,8 @@ Intersection_Buffer *create_intersection_buffer(int size)
     return ret;
 }
 
-void reset_intersection_buffer(Intersection_Buffer *buffer) {
+void reset_intersection_buffer(Intersection_Buffer *buffer)
+{
     buffer->top = 0;
 }
 

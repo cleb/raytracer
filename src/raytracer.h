@@ -23,6 +23,7 @@ typedef struct
     Texture *texture;
     double reflexivity;
     double angle;
+    Color *color;
 } Intersection;
 
 typedef struct
@@ -45,6 +46,7 @@ typedef struct
 
 typedef struct
 {
+    Intersection_Buffer *buffer;
     Intersection *current;
     int items;
 } Intersection_Buffer_Iterator;

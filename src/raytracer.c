@@ -176,6 +176,10 @@ Intersection intersects(double x, double y, double z, Angle alpha, Angle beta, R
         .reflexivity = wall->wall->reflexivity,
         .point_in_space = {.x = intersection_x, .y = intersection_y, .z = wall_y},
         .angle = wall->line.angle};
+    
+    ret.color = get_color(ret.texture,
+                        ret.point.x,
+                        ret.point.y);
     return ret;
 }
 
@@ -251,6 +255,9 @@ Intersection intersects_surface(Render_Surface *surface, Angle alpha, Angle beta
             .y = ret.point.y,
             .z = 0};
         ret.point_in_space = floor_point_in_space;
+        ret.color = get_color(ret.texture,
+                            ret.point.x,
+                            ret.point.y);
         return ret;
     }
     return intersection_null;
@@ -265,8 +272,17 @@ void add_to_intersection_buffer(Intersection_Buffer *buffer, Intersection *inter
 Intersection_Buffer_Iterator get_intersection_buffer_iterator(Intersection_Buffer *buffer)
 {
     qsort(buffer->buffer, buffer->top, sizeof(Intersection), compare_intersections);
-    Intersection_Buffer_Iterator iterator = {.current = buffer->buffer, .items = buffer->top};
+    Intersection_Buffer_Iterator iterator = {.current = buffer->buffer, .items = buffer->top, .buffer = buffer};
     return iterator;
+}
+
+void intersection_buffer_iterator_skip_obscured(Intersection_Buffer_Iterator *iterator) {
+    for(int i = iterator->buffer->top - 1; i > 0; i--) {
+        if(iterator->buffer->buffer[i].color->alpha == 255) {
+            iterator->current = &iterator->buffer->buffer[i];
+            iterator->items = iterator->buffer->top - i;
+        }
+    }
 }
 
 Intersection *intersection_buffer_iterator_get_next(Intersection_Buffer_Iterator *iterator)
@@ -326,15 +342,13 @@ Color trace_ray(double player_x, double player_y, double player_z, double alpha,
     }
 
     Intersection_Buffer_Iterator iterator = get_intersection_buffer_iterator(intersection_buffer);
+    intersection_buffer_iterator_skip_obscured(&iterator);
     Intersection *current_intersection;
     while ((current_intersection = intersection_buffer_iterator_get_next(&iterator)) != NULL)
     {
         if (!intersection_equals(current_intersection, &intersection_null))
         {
-            Color *intersection_color = get_color(current_intersection->texture,
-                                                  current_intersection->point.x,
-                                                  current_intersection->point.y);
-            add_color(&color, intersection_color);
+            add_color(&color, current_intersection->color);
             follow_ray(&color, current_intersection, alpha, beta, canvas, scene, max_bounce);
         }
     }

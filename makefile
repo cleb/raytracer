@@ -30,7 +30,7 @@ map.o: src/map.c
 #tests
 
 runtest: test/test.c test/test_raytracer.o test/test_render_line.o test/test_render_polygon_2d.o raytracer.o texture.o angle.o render_canvas.o render_line.o render_polygon_2d.o
-	gcc test/test.c test/test_raytracer.o test/test_render_line.o test/test_render_polygon_2d.o raytracer.o texture.o angle.o render_canvas.o render_line.o render_polygon_2d.o -o runtest -lcheck -lpthread -lm -lrt -lsubunit
+	gcc test/test.c test/test_raytracer.o test/test_render_line.o test/test_render_polygon_2d.o raytracer.o texture.o angle.o render_canvas.o render_line.o render_polygon_2d.o -o runtest -lcheck -lpthread -lm -lrt -lsubunit -fopenmp
 
 test_raytracer.o: test/test_raytracer.c 
 	gcc test/test_raytracer.c -c -o test_raytracer.o

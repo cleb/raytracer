@@ -11,28 +11,34 @@ START_TEST(test_intersects_direct)
     Point p1 = {.x = -100, .y = 10};
     Point p2 = {.x = 100, .y = 10};
     Line l1 = {.start = p1, .end = p2};
-    Wall wall_data = {.line = l1, .bottom = -100, .top = 100};
-    Render_Line render_line = {.a = 0, .b = 10};
+    Color pixel = {.r = 0, .g = 0, .b = 0, .alpha = 255, .alpha_double = 1};
+    Color pixels[1] = {pixel};
+    Texture texture = {.w = 1, .h = 1, .pixels = pixels};
+    Wall wall_data = {.line = l1, .bottom = -100, .top = 100, .texture = &texture};
+    Render_Line render_line = {.a = 0, .b = 10, .line = &l1, .angle = 0};
     Render_Wall wall = {.line = render_line, .wall = &wall_data};
     Angle alpha = {.angle = M_PI_2, .cos = 0, .sin = 1, .tg = INFINITY};
     Angle beta = {.angle = 0, .cos = 1, .sin = 0, .tg = 0};
     Intersection intersection = intersects(0, 0, 0, alpha, beta, &wall);
-    ck_assert_double_eq(10, intersection.distance_squared);
+    ck_assert_double_eq(100, intersection.distance_squared);
 }
 END_TEST
 
 START_TEST(test_intersects_angle)
 {
+    Color pixel = {.r = 0, .g = 0, .b = 0, .alpha = 255, .alpha_double = 1};
+    Color pixels[1] = {pixel};
+    Texture texture = {.w = 1, .h = 1, .pixels = pixels};
     Point p1 = {.x = -10, .y = -15};
     Point p2 = {.x = 10, .y = 5};
     Line l1 = {.start = p1, .end = p2};
-    Wall wall_data = {.line = l1, .bottom = -100, .top = 100};
-    Render_Line render_line = {.a = 1, .b = -5};
+    Wall wall_data = {.line = l1, .bottom = -100, .top = 100, .texture = &texture};
+    Render_Line render_line = {.a = 1, .b = -5, .line = &l1};
     Render_Wall wall = {.line = render_line, .wall = &wall_data};
     Angle alpha = {.angle = 0, .cos = 1, .sin = 0, .tg = 0};
     Angle beta = {.angle = 0, .cos = 1, .sin = 0, .tg = 0};
     Intersection intersection = intersects(0, 0, 0, alpha, beta, &wall);
-    ck_assert_double_eq(5, intersection.distance_squared);
+    ck_assert_double_eq(25, intersection.distance_squared);
 }
 END_TEST
 
@@ -42,7 +48,7 @@ START_TEST(test_intersects_miss)
     Point p2 = {.x = 100, .y = 10};
     Line l1 = {.start = p1, .end = p2};
     Wall wall_data = {.line = l1, .bottom = -100, .top = 100};
-    Render_Line render_line = {.a = 0, .b = 50};
+    Render_Line render_line = {.a = 0, .b = 50, .line = &l1};
     Render_Wall wall = {.line = render_line, .wall = &wall_data};
     Angle alpha = {.angle = 0, .cos = 1, .sin = 0, .tg = 0};
     Angle beta = {.angle = 0, .cos = 1, .sin = 0, .tg = 0};

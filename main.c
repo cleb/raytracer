@@ -9,7 +9,7 @@
 void render(SDL_Renderer *renderer, double x, double y, double alpha, Render_Canvas *canvas, Render_Scene *scene)
 {
     Color **colors = canvas->colors;
-    #pragma omp parallel for
+#pragma omp parallel for
     for (int s_y = 0; s_y < canvas->screen_h; s_y++)
     {
         for (int s_x = 0; s_x < canvas->screen_w; s_x++)
@@ -50,10 +50,8 @@ int main(int argc, char *argv[])
     SDL_SetWindowTitle(window, "raytracer");
 
     Map *map = load_map("default.map");
-    
 
     Scene scene = {.walls = map->walls, .num_walls = map->num_walls, .surfaces = map->surfaces, .num_surfaces = map->num_surfaces};
-    //end scene geometry
 
     Render_Scene *render_scene = create_render_scene(&scene);
     Render_Canvas *canvas = create_render_canvas(render_width, render_height);

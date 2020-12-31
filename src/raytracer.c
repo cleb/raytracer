@@ -115,7 +115,7 @@ int division_would_be_less_than_0(double a, double b)
     return a > 0 && b < 0 || a < 0 && b > 0;
 }
 
-int intersection_is_impossible(double x, double y, double z, Angle alpha, Angle beta, Render_Wall *wall)
+int intersection_is_impossible(double x, double y, double z, Angle alpha, Render_Wall *wall)
 {
     if (alpha.sin > 0 && wall->line.line->start.y < y && wall->line.line->end.y < y)
     {
@@ -139,7 +139,7 @@ int intersection_is_impossible(double x, double y, double z, Angle alpha, Angle 
 // returns the coordinates where the ray hit the wall if it hits, point_null otherwise
 Intersection intersects(double x, double y, double z, Angle alpha, Angle beta, Render_Wall *wall)
 {
-    if (intersection_is_impossible(x, y, z, alpha, beta, wall))
+    if (intersection_is_impossible(x, y, z, alpha, wall))
     {
         return intersection_null;
     }
@@ -230,7 +230,7 @@ Intersection intersects_surface(Render_Surface *surface, Angle alpha, Angle beta
 
         double inverse_beta = M_PI_2 - beta.angle;
         Angle inverse_beta_angle = get_precomputed_angle(canvas, inverse_beta);
-        double floor_dist = inverse_beta_angle.tg * (player_z - surface->surface->z) * -1;
+        double floor_dist = inverse_beta_angle.tg * (surface->surface->z - player_z);
         double ray_floor_dist = sqrt(pow(floor_dist, 2) + pow((player_z - surface->surface->z), 2));
         ret.distance = ray_floor_dist;
         Point floor_intersect = {.x = floor_dist * alpha.cos + player_x, .y = floor_dist * alpha.sin + player_y};
@@ -309,7 +309,7 @@ void follow_ray(Color *color, Intersection *intersection, double alpha, double b
 {
     if (intersection->reflexivity > 0 && max_bounce > 0)
     {
-        double new_alpha = 2 * intersection->angle - alpha;
+        double new_alpha = 2.0f * intersection->angle - alpha;
         double new_beta = beta;
         Angle new_alpha_angle = get_precomputed_angle(canvas, new_alpha);
         Color reflection_color = trace_ray(

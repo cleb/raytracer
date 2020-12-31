@@ -303,12 +303,16 @@ Color trace_ray(double player_x, double player_y, double player_z, double alpha,
     for (int i = 0; i < scene->num_walls; i++)
     {
         Intersection intersection = intersects(player_x, player_y, player_z, alpha_angle, beta_angle, &(scene->walls[i]));
-        add_to_intersection_buffer(intersection_buffer, &intersection);
+        if(!intersection_equals(&intersection,&intersection_null)) {
+            add_to_intersection_buffer(intersection_buffer, &intersection);
+        }
     }
 
     for(int i = 0; i < scene->num_surfaces; i++) {
         Intersection floor_intersection = intersects_surface(&scene->surfaces[i], alpha_angle, beta_angle, player_x, player_y, player_z, canvas, scene);
-        add_to_intersection_buffer(intersection_buffer, &floor_intersection);            
+        if(!intersection_equals(&floor_intersection,&intersection_null)) {
+            add_to_intersection_buffer(intersection_buffer, &floor_intersection);            
+        }
     }
 
     Intersection_Buffer_Iterator iterator = get_intersection_buffer_iterator(intersection_buffer);

@@ -143,7 +143,7 @@ Render_Polygon_2D create_intersetcion_test_polygin_2d()
     render_lines[1] = render_line2;
     render_lines[2] = render_line3;
     render_lines[3] = render_line4;
-    Render_Polygon_2D polygon = {.lines = render_lines, .numlines = 4};
+    Render_Polygon_2D polygon = {.lines = render_lines, .numlines = 4, .bound_min = p1, .bound_max = p3};
     return polygon;
 }
 

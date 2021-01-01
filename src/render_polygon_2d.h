@@ -6,6 +6,8 @@ typedef struct
 {
     Render_Line *lines;
     int numlines;
+    Point bound_min;
+    Point bound_max;
 } Render_Polygon_2D;
 
 Render_Polygon_2D *create_render_polygon_2d(Polygon_2D *polygon);

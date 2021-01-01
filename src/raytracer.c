@@ -190,6 +190,10 @@ Intersection intersects(double x, double y, double z, Angle alpha, Angle beta, R
 
 int intersects_polygon_2d(Render_Polygon_2D *polygon, Point point)
 {
+    if (polygon->bound_min.x > point.x || polygon->bound_min.y > point.y || polygon->bound_max.x < point.x || polygon->bound_max.y < point.y)
+    {
+        return 0;
+    }
     int has_above = 0;
     int has_below = 0;
     for (int i = 0; i < polygon->numlines; i++)

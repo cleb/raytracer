@@ -194,14 +194,14 @@ int intersects_polygon_2d(Render_Polygon_2D *polygon, Point point)
     int has_below = 0;
     for (int i = 0; i < polygon->numlines; i++)
     {
-        Render_Line current_line = polygon->lines[i];
-        if (current_line.line->start.x == current_line.line->end.x)
+        Render_Line *current_line = &polygon->lines[i];
+        if (current_line->line->start.x == current_line->line->end.x)
         {
             continue;
         }
-        if (current_line.line->start.x < point.x && current_line.line->end.x > point.x)
+        if (current_line->line->start.x < point.x && current_line->line->end.x > point.x)
         {
-            if (point.y < current_line.a * point.x + current_line.b)
+            if (point.y < current_line->a * point.x + current_line->b)
             {
                 has_below = 1;
             }

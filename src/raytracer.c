@@ -162,7 +162,7 @@ Intersection intersects(double x, double y, double z, Angle alpha, Angle beta, R
         return intersection_null;
     }
 
-    double dist_from_wall = sqrtl(pow((intersection_y - y), 2) + pow((intersection_x - x), 2));
+    double dist_from_wall = sqrt(pow((intersection_y - y), 2) + pow((intersection_x - x), 2));
     double wall_y = dist_from_wall * beta.tg + z;
 
     if (wall_y > wall->wall->top || wall_y < wall->wall->bottom)
@@ -170,7 +170,7 @@ Intersection intersects(double x, double y, double z, Angle alpha, Angle beta, R
         return intersection_null;
     }
 
-    double wall_x = sqrtl(pow((intersection_y - wall->wall->line.start.y), 2) + pow((intersection_x - wall->wall->line.start.x), 2));
+    double wall_x = sqrt(pow((intersection_y - wall->wall->line.start.y), 2) + pow((intersection_x - wall->wall->line.start.x), 2));
 
     double ray_dist = (pow(z - wall_y, 2) + pow(dist_from_wall, 2));
 

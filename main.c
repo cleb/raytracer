@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
 
     Map *map = load_map("default.map");
 
-    Scene scene = {.walls = map->walls, .num_walls = map->num_walls, .surfaces = map->surfaces, .num_surfaces = map->num_surfaces};
+    Scene scene = {.walls = map->walls, .num_walls = map->num_walls, .surfaces = map->surfaces, .num_surfaces = map->num_surfaces, .skybox = map->skybox};
 
     Render_Scene *render_scene = create_render_scene(&scene);
     Render_Canvas *canvas = create_render_canvas(render_width, render_height);

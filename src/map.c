@@ -24,6 +24,7 @@ Map *load_map(char *filename) {
     Texture *glass = load_texture("./glass.png");
     Texture *wood = load_texture("./wood.jpg");
     Texture *flowers = load_texture("./flowers.jpg");
+    Texture *skybox = load_texture("skybox.jpg");
     Texture **textures = (Texture **)malloc(6 * sizeof(Texture *));
     textures[0] = wall;
     textures[1] = texture_floor;
@@ -187,6 +188,7 @@ Map *load_map(char *filename) {
     map->num_walls = 12;
     map->surfaces = surfaces;
     map->num_surfaces = 6;
+    map->skybox = skybox;
     return map;
 }
 
@@ -194,6 +196,7 @@ void destroy_map(Map *map) {
     for(int i = 0; i < map->num_textures; i++) {
         destroy_texture(map->textures[i]);
     }
+    destroy_texture(map->skybox);
     free(map->textures);
     for(int i = 0; i < map->num_surfaces; i++) {
         free(map->surfaces[i].polygon);

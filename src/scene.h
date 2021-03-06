@@ -9,4 +9,5 @@ typedef struct
     Texture *surface;
     Surface *surfaces;
     int num_surfaces;
+    Texture *skybox;
 } Scene;

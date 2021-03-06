@@ -42,6 +42,7 @@ typedef struct
     Render_Surface *surfaces;
     Intersection_Buffer **intersection_buffers;
     int num_intersection_buffers;
+    Scene *scene;
 } Render_Scene;
 
 typedef struct

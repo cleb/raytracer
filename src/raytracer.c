@@ -330,11 +330,19 @@ void follow_ray(Color *color, Intersection *intersection, double alpha, double b
     }
 }
 
+Color get_default_color(Angle alpha, Angle beta, Render_Scene *scene){
+    Texture * skybox = scene->scene->skybox;
+    int x = skybox->w * (alpha.angle / (M_PI * 2));
+    int y = skybox->h * (1 - ( beta.sin + 1) / 2);
+    Color *ret = get_color(skybox,x,y);
+    return *ret;
+}
+
 Color trace_ray(double player_x, double player_y, double player_z, double alpha, double beta, Render_Canvas *canvas, Render_Scene *scene, int max_bounce)
 {
     Angle alpha_angle = get_precomputed_angle(canvas, alpha);
     Angle beta_angle = get_precomputed_angle(canvas, beta);
-    Color color = {.r = ret_black.r, .g = ret_black.g, .b = ret_black.b, .alpha = 255, .alpha_double = 1};
+    Color color = get_default_color(alpha_angle, beta_angle, scene);
     int buffer_position = omp_get_thread_num() * (scene->max_bounce + 1) + max_bounce;
     Intersection_Buffer *intersection_buffer = scene->intersection_buffers[buffer_position];
 
@@ -384,6 +392,7 @@ Color render_pixel(double player_x, double player_y, double player_z, double pla
 Render_Scene *create_render_scene(Scene *scene)
 {
     Render_Scene *ret = (Render_Scene *)malloc(sizeof(Render_Scene));
+    ret->scene = scene;
     ret->num_walls = scene->num_walls;
     ret->walls = (Render_Wall *)malloc(scene->num_walls * sizeof(Render_Wall));
 

@@ -11,6 +11,7 @@ typedef struct
     int num_textures;
     Surface *surfaces;
     int num_surfaces;
+    Texture *skybox;
 } Map;
 
 Map *load_map(char *filename);
